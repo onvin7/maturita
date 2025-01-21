@@ -6,20 +6,20 @@ USE `cyklistickey`;
 CREATE TABLE IF NOT EXISTS `admin_access` (
     `id` INT NOT NULL AUTO_INCREMENT,
     `page` VARCHAR(255) NOT NULL, -- Název stránky
-    `role_required` VARCHAR(255) NOT NULL, -- Potřebná role pro přístup
+    `role_1` tinyint(1) NOT NULL,
+    `role_2` tinyint(1) NOT NULL,
     PRIMARY KEY (`id`)
 );
 
 -- Tabulka: admin_access_logs
 CREATE TABLE IF NOT EXISTS `admin_access_logs` (
     `id` INT NOT NULL AUTO_INCREMENT,
-    `admin_access_id` INT NOT NULL, -- Odkaz na admin_access
     `changed_by` INT NOT NULL, -- ID uživatele, který změnu provedl
     `change_date` DATETIME NOT NULL, -- Datum a čas změny
     `page` VARCHAR(255) NOT NULL, -- Název stránky při změně
-    `role_required` VARCHAR(255) NOT NULL, -- Potřebná role při změně
+    `role_1` tinyint(1) NOT NULL,
+    `role_2` tinyint(1) NOT NULL,
     PRIMARY KEY (`id`),
-    CONSTRAINT FK_admin_access_logs_to_access FOREIGN KEY (`admin_access_id`) REFERENCES `admin_access` (`id`),
     CONSTRAINT FK_admin_access_logs_to_users FOREIGN KEY (`changed_by`) REFERENCES `users` (`id`)
 );
 
@@ -146,3 +146,17 @@ CREATE TABLE IF NOT EXISTS `views_clanku` (
     CONSTRAINT FK_clanky_TO_views_clanku FOREIGN KEY (`id_clanku`) REFERENCES `clanky` (`id`),
     INDEX idx_fk_clanek_views_clanku (`id_clanku`)
 );
+
+ALTER TABLE admin_access ENGINE=InnoDB;
+ALTER TABLE admin_access_logs ENGINE=InnoDB;
+ALTER TABLE audio ENGINE=InnoDB;
+ALTER TABLE clanky ENGINE=InnoDB;
+ALTER TABLE clanky_kategorie ENGINE=InnoDB;
+ALTER TABLE kategorie ENGINE=InnoDB;
+ALTER TABLE pageviews ENGINE=InnoDB;
+ALTER TABLE password_resets ENGINE=InnoDB;
+ALTER TABLE propagace ENGINE=InnoDB;
+ALTER TABLE users ENGINE=InnoDB;
+ALTER TABLE users_online ENGINE=InnoDB;
+ALTER TABLE user_social ENGINE=InnoDB;
+ALTER TABLE views_clanku ENGINE=InnoDB;

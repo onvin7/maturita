@@ -15,10 +15,18 @@ class CategoryAdminController
 
     public function index()
     {
-        $categories = $this->model->getAll();
+        $sortBy = $_GET['sort_by'] ?? 'id';      // Výchozí řazení podle ID
+        $order = $_GET['order'] ?? 'ASC';       // Výchozí vzestupné řazení
+        $filter = $_GET['filter'] ?? '';        // Výchozí bez filtru
+
+        // Načtení kategorií s filtrováním a řazením
+        $categories = $this->model->getAllWithSortingAndFiltering($sortBy, $order, $filter);
+
+        // Zobrazení view
         $view = '../../app/Views/Admin/categories/index.php';
         include '../../app/Views/Admin/layout/base.php';
     }
+
 
     public function create()
     {

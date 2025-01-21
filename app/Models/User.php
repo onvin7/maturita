@@ -78,16 +78,27 @@ class User
         return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 
-    public function getAllWithSortingAndFiltering($sortBy, $order, $filter)
+    public function getAllWithSortingAndFiltering($sortBy = 'id', $order = 'ASC', $filter = '')
     {
-        $validSortColumns = ['name', 'surname', 'email', 'role']; // Povolené sloupce pro řazení
-        $sortBy = in_array($sortBy, $validSortColumns) ? $sortBy : 'name';
-        $order = strtoupper($order) === 'ASC' ? 'ASC' : 'DESC';
+        $allowedColumns = ['id', 'name', 'surname', 'email', 'role'];
+        $allowedOrder = ['ASC', 'DESC'];
 
-        $query = "SELECT * FROM users WHERE name LIKE :filter OR surname LIKE :filter OR email LIKE :filter ORDER BY $sortBy $order";
+        // Ověření sloupce a směru řazení
+        if (!in_array($sortBy, $allowedColumns)) {
+            $sortBy = 'id';
+        }
+        if (!in_array($order, $allowedOrder)) {
+            $order = 'ASC';
+        }
+
+        // SQL dotaz pro filtrování a řazení
+        $query = "
+            SELECT * FROM users
+            WHERE name LIKE :filter OR surname LIKE :filter OR email LIKE :filter
+            ORDER BY $sortBy $order
+        ";
         $stmt = $this->db->prepare($query);
-        $stmt->bindValue(':filter', '%' . $filter . '%', \PDO::PARAM_STR);
-        $stmt->execute();
+        $stmt->execute(['filter' => '%' . $filter . '%']);
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 }

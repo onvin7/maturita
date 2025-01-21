@@ -29,7 +29,8 @@ class Statistics
                   FROM views_clanku
                   JOIN clanky ON views_clanku.id_clanku = clanky.id
                   GROUP BY clanky.id, clanky.nazev
-                  ORDER BY pocet_zobrazeni DESC";
+                  ORDER BY pocet_zobrazeni DESC
+                  LIMIT 10";
         $stmt = $this->db->prepare($query);
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);

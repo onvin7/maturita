@@ -16,10 +16,18 @@ class UserAdminController
     // Zobrazení seznamu uživatelů
     public function index()
     {
-        $users = $this->model->getAll();
+        $sortBy = $_GET['sort_by'] ?? 'id';      // Výchozí řazení podle ID
+        $order = $_GET['order'] ?? 'ASC';       // Výchozí vzestupné řazení
+        $filter = $_GET['filter'] ?? '';        // Výchozí bez filtru
+
+        // Načtení uživatelů s filtrováním a řazením
+        $users = $this->model->getAllWithSortingAndFiltering($sortBy, $order, $filter);
+
+        // Zobrazení view
         $view = '../../app/Views/Admin/users/index.php';
         include '../../app/Views/Admin/layout/base.php';
     }
+
 
     public function edit($id)
     {

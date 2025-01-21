@@ -1,55 +1,58 @@
 <div class="container mt-4">
     <h1 class="text-center mb-4">Správa článků</h1>
 
-    <!-- Filtrování -->
-    <form action="/admin/articles" method="GET" class="mb-4">
-        <div class="row g-2">
-            <div class="col-md-4">
-                <input type="text" name="filter" class="form-control" placeholder="Hledat články..." value="<?= htmlspecialchars($_GET['filter'] ?? '') ?>">
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-primary w-100">Filtrovat</button>
-            </div>
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-6 text-start">
+            <a href="/admin/articles/create" class="btn btn-success">Vytvořit nový článek</a>
         </div>
-    </form>
+
+        <div class="col-md-6">
+            <form action="/admin/articles" method="GET">
+                <div class="input-group">
+                    <input type="text" name="filter" class="form-control" placeholder="Hledat články..." value="<?= htmlspecialchars($_GET['filter'] ?? '') ?>">
+                    <button type="submit" class="btn btn-primary">Filtrovat</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Tabulka článků -->
     <div class="table-responsive">
-        <table class="table table-striped table-hover align-middle border rounded shadow">
-            <thead class="table-dark rounded-top">
+        <table class="table table-bordered table-striped table-hover">
+            <thead class="table-dark text-center">
                 <tr>
                     <th>
-                        <a href="?sort_by=id&amp;order=<?= ($sortBy === 'id' && $order === 'ASC') ? 'DESC' : 'ASC' ?>" class="text-white text-decoration-none d-flex justify-content-between align-items-center">
+                        <a href="?sort_by=id&amp;order=<?= ($sortBy === 'id' && $order === 'ASC') ? 'DESC' : 'ASC' ?>" class="text-white text-decoration-none ">
                             <span>ID</span>
                             <span><?= ($sortBy === 'id') ? ($order === 'ASC' ? '⬆' : '⬇') : '' ?></span>
                         </a>
                     </th>
                     <th>
-                        <a href="?sort_by=nazev&amp;order=<?= (($_GET['sort_by'] ?? '') === 'nazev' && ($_GET['order'] ?? 'DESC') === 'ASC') ? 'DESC' : 'ASC' ?>" class="text-white text-decoration-none d-flex justify-content-between align-items-center">
+                        <a href="?sort_by=nazev&amp;order=<?= (($_GET['sort_by'] ?? '') === 'nazev' && ($_GET['order'] ?? 'DESC') === 'ASC') ? 'DESC' : 'ASC' ?>" class="text-white text-decoration-none ">
                             <span>Název</span>
                             <span><?= ($_GET['sort_by'] ?? '') === 'nazev' ? (($_GET['order'] ?? 'DESC') === 'ASC' ? '⬆' : '⬇') : '' ?></span>
                         </a>
                     </th>
                     <th>
-                        <a href="?sort_by=datum&amp;order=<?= (($_GET['sort_by'] ?? '') === 'datum' && ($_GET['order'] ?? 'DESC') === 'ASC') ? 'DESC' : 'ASC' ?>" class="text-white text-decoration-none d-flex justify-content-between align-items-center">
+                        <a href="?sort_by=datum&amp;order=<?= (($_GET['sort_by'] ?? '') === 'datum' && ($_GET['order'] ?? 'DESC') === 'ASC') ? 'DESC' : 'ASC' ?>" class="text-white text-decoration-none ">
                             <span>Datum</span>
                             <span><?= ($_GET['sort_by'] ?? 'datum') === 'datum' ? (($_GET['order'] ?? 'DESC') === 'ASC' ? '⬆' : '⬇') : '' ?></span>
                         </a>
                     </th>
                     <th>
-                        <a href="?sort_by=viditelnost&amp;order=<?= (($_GET['sort_by'] ?? '') === 'viditelnost' && ($_GET['order'] ?? 'DESC') === 'ASC') ? 'DESC' : 'ASC' ?>" class="text-white text-decoration-none d-flex justify-content-between align-items-center">
+                        <a href="?sort_by=viditelnost&amp;order=<?= (($_GET['sort_by'] ?? '') === 'viditelnost' && ($_GET['order'] ?? 'DESC') === 'ASC') ? 'DESC' : 'ASC' ?>" class="text-white text-decoration-none ">
                             <span>Viditelnost</span>
                             <span><?= ($_GET['sort_by'] ?? '') === 'viditelnost' ? (($_GET['order'] ?? 'DESC') === 'ASC' ? '⬆' : '⬇') : '' ?></span>
                         </a>
                     </th>
                     <th>
-                        <a href="?sort_by=user_id&amp;order=<?= (($_GET['sort_by'] ?? '') === 'user_id' && ($_GET['order'] ?? 'DESC') === 'ASC') ? 'DESC' : 'ASC' ?>" class="text-white text-decoration-none d-flex justify-content-between align-items-center">
+                        <a href="?sort_by=user_id&amp;order=<?= (($_GET['sort_by'] ?? '') === 'user_id' && ($_GET['order'] ?? 'DESC') === 'ASC') ? 'DESC' : 'ASC' ?>" class="text-white text-decoration-none ">
                             <span>Autor</span>
                             <span><?= ($_GET['sort_by'] ?? '') === 'user_id' ? (($_GET['order'] ?? 'DESC') === 'ASC' ? '⬆' : '⬇') : '' ?></span>
                         </a>
                     </th>
                     <th>
-                        <a href="?sort_by=pocet_zobrazeni&amp;order=<?= (($_GET['sort_by'] ?? '') === 'pocet_zobrazeni' && ($_GET['order'] ?? 'DESC') === 'ASC') ? 'DESC' : 'ASC' ?>" class="text-white text-decoration-none d-flex justify-content-between align-items-center">
+                        <a href="?sort_by=pocet_zobrazeni&amp;order=<?= (($_GET['sort_by'] ?? '') === 'pocet_zobrazeni' && ($_GET['order'] ?? 'DESC') === 'ASC') ? 'DESC' : 'ASC' ?>" class="text-white text-decoration-none ">
                             <span>Zobrazení</span>
                             <span><?= ($_GET['sort_by'] ?? '') === 'pocet_zobrazeni' ? (($_GET['order'] ?? 'DESC') === 'ASC' ? '⬆' : '⬇') : '' ?></span>
                         </a>
@@ -57,7 +60,7 @@
                     <th>Akce</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="text-center">
                 <?php
                 $maxViews = max(array_column($articles, 'pocet_zobrazeni'));
                 $minViews = min(array_column($articles, 'pocet_zobrazeni'));

@@ -69,11 +69,31 @@ class Category
 
     public function delete($id)
     {
-        $query = "DELETE FROM kategorie WHERE id = :id";
-        $stmt = $this->db->prepare($query);
-        $stmt->bindValue(':id', $id, \PDO::PARAM_INT);
-        return $stmt->execute();
+        try {
+            // Zkontrolovat závislé záznamy
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM clanky_kategorie WHERE id_kategorie = :id");
+            $stmt->bindParam(':id', $id, \PDO::PARAM_INT); // Opravený název parametru
+            $stmt->execute();
+            $count = $stmt->fetchColumn();
+
+            if ($count > 0) {
+                echo "<script>alert('Kategorie nemůže být smazána, protože obsahuje závislé záznamy.');</script>";
+                return false;
+            }
+
+            // Smazání samotné kategorie
+            $stmt = $this->db->prepare("DELETE FROM kategorie WHERE id = :id"); // Opravený parametr
+            $stmt->bindParam(':id', $id, \PDO::PARAM_INT); // Přidáno $
+            $stmt->execute();
+
+            return true;
+        } catch (\PDOException $e) {
+            echo "<script>alert('Chyba při mazání kategorie: " . addslashes($e->getMessage()) . "');</script>";
+            return false;
+        }
     }
+
+
 
     public function getArticlesByCategory($categoryId)
     {
@@ -99,16 +119,28 @@ class Category
         $stmt->execute();
         return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
-    public function getAllWithSortingAndFiltering($sortBy, $order, $filter)
-    {
-        $validSortColumns = ['nazev_kategorie', 'id']; // Povolené sloupce pro řazení
-        $sortBy = in_array($sortBy, $validSortColumns) ? $sortBy : 'id';
-        $order = strtoupper($order) === 'ASC' ? 'ASC' : 'DESC';
 
-        $query = "SELECT * FROM kategorie WHERE nazev_kategorie LIKE :filter ORDER BY $sortBy $order";
+    public function getAllWithSortingAndFiltering($sortBy = 'id', $order = 'ASC', $filter = '')
+    {
+        $allowedColumns = ['id', 'nazev_kategorie', 'url']; // Používáme názvy podle tabulky
+        $allowedOrder = ['ASC', 'DESC'];                 // Povolené směry řazení
+
+        // Ověření sloupce a směru řazení
+        if (!in_array($sortBy, $allowedColumns)) {
+            $sortBy = 'id';
+        }
+        if (!in_array($order, $allowedOrder)) {
+            $order = 'ASC';
+        }
+
+        // SQL dotaz pro filtrování a řazení
+        $query = "SELECT * FROM kategorie
+        WHERE nazev_kategorie LIKE :filter
+        ORDER BY $sortBy $order";
         $stmt = $this->db->prepare($query);
         $stmt->bindValue(':filter', '%' . $filter . '%', \PDO::PARAM_STR);
         $stmt->execute();
+
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 }
