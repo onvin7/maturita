@@ -9,7 +9,9 @@
 </head>
 
 <body>
-    <?php include 'navbar.php'; ?>
+    <?php if (!isset($disableNavbar) || !$disableNavbar): ?>
+        <?php include 'navbar.php'; ?>
+    <?php endif; ?>
     <div class="container mt-4">
         <?php include $view; ?>
     </div>

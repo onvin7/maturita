@@ -1,3 +1,6 @@
+<?php if (!isset($accessibleSections)) {
+    die("Chyba: Navbar nebyl správně inicializován.");
+} ?>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="/admin">Admin Panel</a>
@@ -6,14 +9,12 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
-                <li class="nav-item"><a class="nav-link" href="/admin/articles">Články</a></li>
-                <li class="nav-item"><a class="nav-link" href="/admin/categories">Kategorie</a></li>
-                <li class="nav-item"><a class="nav-link" href="/admin/statistics">Statistiky</a></li>
-                <li class="nav-item"><a class="nav-link" href="/admin/users">Uživatelé</a></li>
-                <li class="nav-item"><a class="nav-link" href="/admin/access-control">Správa přístupů</a></li> <!-- Opravený odkaz -->
+                <?php foreach ($accessibleSections as $section): ?>
+                    <li class="nav-item"><a class="nav-link" href="/admin/<?= htmlspecialchars($section) ?>"><?= ucfirst(htmlspecialchars($section)) ?></a></li>
+                <?php endforeach; ?>
             </ul>
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link text-danger" href="/admin/logout">Odhlásit</a></li>
+                <li class="nav-item"><a class="nav-link text-danger" href="/logout">Odhlásit</a></li>
             </ul>
         </div>
     </div>

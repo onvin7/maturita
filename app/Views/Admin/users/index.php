@@ -1,15 +1,16 @@
 <div class="container mt-4">
     <h1 class="mb-4 text-center">Správa uživatelů</h1>
 
-    <!-- Formulář pro filtrování -->
-    <form method="GET" action="" class="mb-4">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <label for="filter" class="form-label">Hledat uživatele:</label>
-                <input type="text" id="filter" name="filter" class="form-control" placeholder="Jméno nebo email" value="<?= htmlspecialchars($_GET['filter'] ?? '') ?>">
-            </div>
+    <div class="row mb-4 align-items-center justify-content-end">
+        <div class="col-md-6">
+            <form action="/admin/users" method="GET">
+                <div class="input-group">
+                    <input type="text" name="filter" class="form-control" placeholder="Hledat uživatele..." value="<?= htmlspecialchars($_GET['filter'] ?? '') ?>">
+                    <button type="submit" class="btn btn-primary">Filtrovat</button>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 
     <!-- Výpis uživatelů -->
     <div class="table-responsive">

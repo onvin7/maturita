@@ -33,6 +33,18 @@ if ($uri === '/' || $uri === '/home') {
 } elseif ($uri === '/logout') {
     $controller = new LoginController($db);
     $controller->logout();
+} elseif ($uri === '/register' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    $controller = new LoginController($db);
+    $controller->create();
+} elseif ($uri === '/register/submit' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $controller = new LoginController($db);
+    $controller->store();
+} elseif ($uri === '/reset-password' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    $controller = new LoginController($db);
+    $controller->reset();
+} elseif ($uri === '/reset-password/submit' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $controller = new LoginController($db);
+    $controller->resetPassword();
 } else {
     echo "Stránka nenalezena.";
 }

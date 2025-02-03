@@ -3,9 +3,10 @@ require '../../config/db.php';
 require '../../config/autoloader.php';
 
 use App\Middleware\AuthMiddleware;
+use App\Models\AccessControl;
+use App\Controllers\Admin\AccessControlAdminController;
 use App\Controllers\Admin\HomeAdminController;
 use App\Controllers\Admin\StatisticsAdminController;
-use App\Controllers\Admin\AccessControlAdminController;
 use App\Controllers\Admin\ArticleAdminController;
 use App\Controllers\Admin\CategoryAdminController;
 use App\Controllers\Admin\UserAdminController;
@@ -17,21 +18,35 @@ $db = (new Database())->connect();
 // Middleware pro ověření přístupu
 AuthMiddleware::check($db);
 
+// Načtení modelu AccessControl
+$accessControl = new AccessControl($db);
+$currentRole = $_SESSION['role'] ?? 0;
+
+// Získání seznamu přístupných sekcí pro navbar
+$accessibleSections = $accessControl->getAccessibleSections($currentRole);
+
 // Zpracování URI
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH); // Získání pouze cesty bez query parametrů
-$uri = str_replace('/admin', '', $uri); // Odebereme část `/admin`
-$uri = trim($uri, '/'); // Odebereme zbytečná lomítka
+$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$uri = str_replace('/admin', '', $uri);
+$uri = trim($uri, '/');
+
+// Umožnění přístupu na home (admin/) všem rolím
+if ($uri === '' || $uri === 'home') {
+    $controller = new HomeAdminController($db);
+    $controller->index();
+    exit();
+}
 
 // Definice rout s dynamickým rozpoznáním
 $routes = [
     '' => [HomeAdminController::class, 'index'],
     'statistics' => [StatisticsAdminController::class, 'index'],
     'statistics/top' => [StatisticsAdminController::class, 'top'],
-    'statistics/view' => [StatisticsAdminController::class, 'view', 'id'], // s dynamickým ID
+    'statistics/view' => [StatisticsAdminController::class, 'view', 'id'],
     'articles' => [ArticleAdminController::class, 'index'],
     'articles/create' => [ArticleAdminController::class, 'create'],
-    'articles/store' => [ArticleAdminController::class, 'store', 'data'], // Označení pro POST data
-    'articles/edit' => [ArticleAdminController::class, 'edit', 'id'], // s dynamickým ID
+    'articles/store' => [ArticleAdminController::class, 'store', 'data'],
+    'articles/edit' => [ArticleAdminController::class, 'edit', 'id'],
     'articles/update' => [ArticleAdminController::class, 'update', 'id'],
     'categories' => [CategoryAdminController::class, 'index'],
     'categories/create' => [CategoryAdminController::class, 'create'],
@@ -45,7 +60,7 @@ $routes = [
     'users/delete' => [UserAdminController::class, 'delete', 'id'],
     'access-control' => [AccessControlAdminController::class, 'index'],
     'access-control/update' => [AccessControlAdminController::class, 'update'],
-    'logout' => [LoginController::class, 'logout'], // Logout přidán
+    'logout' => [LoginController::class, 'logout'],
 ];
 
 // Dynamické zpracování rout
@@ -55,20 +70,24 @@ foreach ($routes as $path => $route) {
     if (preg_match('#^' . $path . '(/(\d+))?$#', $uri, $matches)) {
         $controllerClass = $route[0];
         $method = $route[1];
-        $param = $matches[2] ?? null; // Získání ID, pokud existuje
+        $param = $matches[2] ?? null;
+
+        // Kontrola přístupu k dané stránce
+        if (!in_array($path, $accessibleSections)) {
+            echo "<script>alert('Na tuto stránku nemáte přístup.');</script>";
+            $routeFound = true;
+            break;
+        }
+
         $controller = new $controllerClass($db);
 
-        // Pokud je metoda `store` nebo jiná s POST daty, použijeme `$_POST`
-        if ($path === 'articles/update' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-            $controller->$method($param, $_POST); // Přidání dat z formuláře
-        } elseif ($path === 'articles/store') {
+        // Zpracování metod
+        if ($path === 'articles/store' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             $controller->$method($_POST);
         } elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && $path === 'categories/store') {
-            $controller->$method($_POST); // Předání dat z formuláře
+            $controller->$method($_POST);
         } elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && $path === 'categories/update') {
-            $controller->$method($param, $_POST); // Předání dat z formuláře a ID
-        } elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && $path === 'users/update') {
-            $controller->$method($param, $_POST); // Předání ID a dat z formuláře
+            $controller->$method($param, $_POST);
         } elseif ($param) {
             $controller->$method($param);
         } else {
@@ -79,7 +98,6 @@ foreach ($routes as $path => $route) {
         break;
     }
 }
-
 
 if (!$routeFound) {
     echo "Stránka nenalezena.";

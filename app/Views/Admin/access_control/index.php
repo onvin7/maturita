@@ -1,62 +1,55 @@
 <div class="container mt-4">
-    <h1 class="text-center">Správa přístupů</h1>
-    <form method="POST" action="/admin/access-control/update" class="mt-4">
-        <div class="form-check form-check-inline mb-3">
-            <input class="form-check-input" type="checkbox" id="selectAll" onclick="toggleAll(this)">
-            <label class="form-check-label" for="selectAll">Vybrat vše</label>
-        </div>
+    <h1 class="text-center mb-4">Správa přístupů</h1>
+    <div class="d-flex justify-content-end mb-3">
+    </div>
 
-        <ul class="list-group">
-            <!-- Strom pro úrovně uživatelů -->
-            <li class="list-group-item">
-                <strong>Admin</strong>
-                <ul class="list-group mt-2">
-                    <li class="list-group-item">
-                        <input type="checkbox" name="access[admin][dashboard]" id="admin-dashboard">
-                        <label for="admin-dashboard">Dashboard</label>
-                    </li>
-                    <li class="list-group-item">
-                        <input type="checkbox" name="access[admin][users]" id="admin-users">
-                        <label for="admin-users">Správa uživatelů</label>
-                    </li>
-                </ul>
-            </li>
-            <li class="list-group-item">
-                <strong>Admin 2</strong>
-                <ul class="list-group mt-2">
-                    <li class="list-group-item">
-                        <input type="checkbox" name="access[admin2][reports]" id="admin2-reports">
-                        <label for="admin2-reports">Reporty</label>
-                    </li>
-                    <li class="list-group-item">
-                        <input type="checkbox" name="access[admin2][settings]" id="admin2-settings">
-                        <label for="admin2-settings">Nastavení</label>
-                    </li>
-                </ul>
-            </li>
-            <li class="list-group-item">
-                <strong>Super Admin</strong>
-                <ul class="list-group mt-2">
-                    <li class="list-group-item">
-                        <input type="checkbox" name="access[superadmin][logs]" id="superadmin-logs">
-                        <label for="superadmin-logs">Logy</label>
-                    </li>
-                    <li class="list-group-item">
-                        <input type="checkbox" name="access[superadmin][advanced]" id="superadmin-advanced">
-                        <label for="superadmin-advanced">Pokročilé nastavení</label>
-                    </li>
-                </ul>
-            </li>
-        </ul>
+    <form action="/admin/access-control/update" method="POST">
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark text-center">
+                <tr>
+                    <th>Stránka</th>
+                    <th>Role 1</th>
+                    <th>Role 2</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                $currentGroup = null;
+                $pages = $pages ?? []; // Zajištění existence proměnné
+                ?>
 
-        <button type="submit" class="btn btn-primary mt-3">Uložit změny</button>
+                <?php foreach ($pages as $page): ?>
+                    <?php
+                    // Získání první části URI jako skupiny
+                    $group = explode('/', $page['page'])[0];
+                    if ($group !== $currentGroup):
+                        $currentGroup = $group;
+                    ?>
+                        <!-- Oddíl pro skupinu -->
+                        <tr class="table-primary">
+                            <td colspan="3" class="fw-bold text-uppercase text-center py-2">
+                                <?= htmlspecialchars($currentGroup) ?>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+
+                    <!-- Výpis stránky -->
+                    <tr>
+                        <td><?= htmlspecialchars($page['page']) ?></td>
+                        <td class="text-center">
+                            <label class="form-check-label">
+                                <input type="checkbox" class="form-check-input" style="transform: scale(1.5); margin: 10px; background-color: <?= $page['role_1'] ? '#28a745' : '#dc3545'; ?>;" name="role_1[<?= htmlspecialchars($page['page']) ?>]" <?= $page['role_1'] ? 'checked' : '' ?> onchange="this.style.backgroundColor = this.checked ? '#28a745' : '#dc3545';">
+                            </label>
+                        </td>
+                        <td class="text-center">
+                            <label class="form-check-label">
+                                <input type="checkbox" class="form-check-input" style="transform: scale(1.5); margin: 10px; background-color: <?= $page['role_2'] ? '#28a745' : '#dc3545'; ?>;" name="role_2[<?= htmlspecialchars($page['page']) ?>]" <?= $page['role_2'] ? 'checked' : '' ?> onchange="this.style.backgroundColor = this.checked ? '#28a745' : '#dc3545';">
+                            </label>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-primary">Uložit změny</button>
     </form>
 </div>
-
-<script>
-    // Funkce pro výběr všech checkboxů
-    function toggleAll(source) {
-        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-        checkboxes.forEach(checkbox => checkbox.checked = source.checked);
-    }
-</script>
