@@ -2470,3 +2470,18 @@
 [Thu Feb 27 11:48:19.145441 2025] [php:notice] [pid 8652:tid 1936] [client 127.0.0.1:57495] DEBUG: User ID: 1, Role: 3, referer: http://cyklistickey.local/admin/articles?sort_by=datum&order=DESC
 [Thu Feb 27 11:48:19.145441 2025] [php:notice] [pid 8652:tid 1936] [client 127.0.0.1:57495] DEBUG: P\xc5\x99\xc3\xadstup na URI: articles/create, referer: http://cyklistickey.local/admin/articles?sort_by=datum&order=DESC
 [Thu Feb 27 11:48:19.145441 2025] [php:notice] [pid 8652:tid 1936] [client 127.0.0.1:57495] DEBUG: Role 3 m\xc3\xa1 p\xc5\x99\xc3\xadstup ke v\xc5\xa1emu., referer: http://cyklistickey.local/admin/articles?sort_by=datum&order=DESC
+[Thu Feb 27 11:54:06.002692 2025] [php:notice] [pid 8372:tid 1940] [client 127.0.0.1:56953] DEBUG: User ID: 1, Role: 3, referer: http://cyklistickey.local/admin/articles?sort_by=datum&order=DESC
+[Thu Feb 27 11:54:06.002692 2025] [php:notice] [pid 8372:tid 1940] [client 127.0.0.1:56953] DEBUG: P\xc5\x99\xc3\xadstup na URI: articles/create, referer: http://cyklistickey.local/admin/articles?sort_by=datum&order=DESC
+[Thu Feb 27 11:54:06.002692 2025] [php:notice] [pid 8372:tid 1940] [client 127.0.0.1:56953] DEBUG: Role 3 m\xc3\xa1 p\xc5\x99\xc3\xadstup ke v\xc5\xa1emu., referer: http://cyklistickey.local/admin/articles?sort_by=datum&order=DESC
+[Thu Feb 27 11:56:00.093499 2025] [php:notice] [pid 8372:tid 1940] [client 127.0.0.1:54138] DEBUG: User ID: 1, Role: 3, referer: http://cyklistickey.local/admin/articles/create
+[Thu Feb 27 11:56:00.093499 2025] [php:notice] [pid 8372:tid 1940] [client 127.0.0.1:54138] DEBUG: P\xc5\x99\xc3\xadstup na URI: articles, referer: http://cyklistickey.local/admin/articles/create
+[Thu Feb 27 11:56:00.093499 2025] [php:notice] [pid 8372:tid 1940] [client 127.0.0.1:54138] DEBUG: Role 3 m\xc3\xa1 p\xc5\x99\xc3\xadstup ke v\xc5\xa1emu., referer: http://cyklistickey.local/admin/articles/create
+[Thu Feb 27 11:56:08.356662 2025] [php:notice] [pid 8372:tid 1940] [client 127.0.0.1:54157] DEBUG: User ID: 1, Role: 3, referer: http://cyklistickey.local/admin/articles
+[Thu Feb 27 11:56:08.356662 2025] [php:notice] [pid 8372:tid 1940] [client 127.0.0.1:54157] DEBUG: P\xc5\x99\xc3\xadstup na URI: articles/edit/59, referer: http://cyklistickey.local/admin/articles
+[Thu Feb 27 11:56:08.356662 2025] [php:notice] [pid 8372:tid 1940] [client 127.0.0.1:54157] DEBUG: Role 3 m\xc3\xa1 p\xc5\x99\xc3\xadstup ke v\xc5\xa1emu., referer: http://cyklistickey.local/admin/articles
+[Thu Feb 27 11:56:12.540481 2025] [php:notice] [pid 8372:tid 1940] [client 127.0.0.1:54277] DEBUG: User ID: 1, Role: 3, referer: http://cyklistickey.local/admin/articles/edit/59
+[Thu Feb 27 11:56:12.540481 2025] [php:notice] [pid 8372:tid 1940] [client 127.0.0.1:54277] DEBUG: P\xc5\x99\xc3\xadstup na URI: articles/update/59, referer: http://cyklistickey.local/admin/articles/edit/59
+[Thu Feb 27 11:56:12.540481 2025] [php:notice] [pid 8372:tid 1940] [client 127.0.0.1:54277] DEBUG: Role 3 m\xc3\xa1 p\xc5\x99\xc3\xadstup ke v\xc5\xa1emu., referer: http://cyklistickey.local/admin/articles/edit/59
+[Thu Feb 27 11:56:12.602340 2025] [php:notice] [pid 8372:tid 1940] [client 127.0.0.1:54277] DEBUG: User ID: 1, Role: 3, referer: http://cyklistickey.local/admin/articles/edit/59
+[Thu Feb 27 11:56:12.602340 2025] [php:notice] [pid 8372:tid 1940] [client 127.0.0.1:54277] DEBUG: P\xc5\x99\xc3\xadstup na URI: articles, referer: http://cyklistickey.local/admin/articles/edit/59
+[Thu Feb 27 11:56:12.602340 2025] [php:notice] [pid 8372:tid 1940] [client 127.0.0.1:54277] DEBUG: Role 3 m\xc3\xa1 p\xc5\x99\xc3\xadstup ke v\xc5\xa1emu., referer: http://cyklistickey.local/admin/articles/edit/59

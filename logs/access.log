@@ -6353,3 +6353,17 @@ fe80::b27c:71e5:c77a:e51a - - [27/Feb/2025:11:28:26 +0100] "GET / HTTP/1.1" 200 
 127.0.0.1 - - [27/Feb/2025:11:48:19 +0100] "GET /favicon.ico HTTP/1.1" 200 32
 127.0.0.1 - - [27/Feb/2025:11:48:19 +0100] "GET /js/tinymce-config.js HTTP/1.1" 200 1536
 127.0.0.1 - - [27/Feb/2025:11:48:19 +0100] "GET /favicon.ico HTTP/1.1" 200 32
+127.0.0.1 - - [27/Feb/2025:11:54:05 +0100] "GET /admin/articles/create HTTP/1.1" 200 5167
+127.0.0.1 - - [27/Feb/2025:11:56:00 +0100] "GET /admin/articles HTTP/1.1" 200 65931
+127.0.0.1 - - [27/Feb/2025:11:56:08 +0100] "GET /admin/articles/edit/59 HTTP/1.1" 200 6945
+127.0.0.1 - - [27/Feb/2025:11:56:08 +0100] "GET /uploads/articles/67c03a86367b7_GOPR0509.JPG HTTP/1.1" 304 -
+127.0.0.1 - - [27/Feb/2025:11:56:12 +0100] "POST /admin/articles/update/59 HTTP/1.1" 302 -
+127.0.0.1 - - [27/Feb/2025:11:56:12 +0100] "GET /admin/articles HTTP/1.1" 200 65927
+127.0.0.1 - - [27/Feb/2025:11:56:16 +0100] "GET / HTTP/1.1" 200 7167
+127.0.0.1 - - [27/Feb/2025:11:56:16 +0100] "GET /uploads/thumbnails/male/IMG_3880.jpeg HTTP/1.1" 404 25
+127.0.0.1 - - [27/Feb/2025:11:56:16 +0100] "GET /uploads/thumbnails/male/img_6799.jpg HTTP/1.1" 404 25
+127.0.0.1 - - [27/Feb/2025:11:56:18 +0100] "GET / HTTP/1.1" 200 7167
+127.0.0.1 - - [27/Feb/2025:11:56:18 +0100] "GET /uploads/thumbnails/male/img_6799.jpg HTTP/1.1" 404 25
+127.0.0.1 - - [27/Feb/2025:11:56:18 +0100] "GET /uploads/thumbnails/male/IMG_3880.jpeg HTTP/1.1" 404 25
+127.0.0.1 - - [27/Feb/2025:11:56:22 +0100] "GET /article/21-kreatin-monohydrat-21-kg HTTP/1.1" 200 160
+127.0.0.1 - - [27/Feb/2025:11:56:29 +0100] "GET /article/21-kreatin-monohydrat-21-kg?controller=Home&action=index HTTP/1.1" 200 160
