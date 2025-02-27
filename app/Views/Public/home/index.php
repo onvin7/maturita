@@ -13,7 +13,7 @@ include '../app/Views/Public/layouts/header.php';
                 <div class="col-md-4">
                     <div class="card h-100">
                         <?php if (!empty($article['nahled_foto'])): ?>
-                            <img src="/uploads/thumbnails/<?= htmlspecialchars($article['nahled_foto']) ?>" class="card-img-top" alt="<?= htmlspecialchars($article['nazev']) ?>">
+                            <img src="/uploads/thumbnails/male/<?= htmlspecialchars($article['nahled_foto']) ?>" class="card-img-top" alt="<?= htmlspecialchars($article['nazev']) ?>">
                         <?php else: ?>
                             <img src="/uploads/thumbnails/default.jpg" class="card-img-top" alt="Výchozí obrázek">
                         <?php endif; ?>

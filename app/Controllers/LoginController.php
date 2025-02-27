@@ -4,6 +4,11 @@ namespace App\Controllers;
 
 use App\Models\User;
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require_once __DIR__ . '/../../vendor/autoload.php';
+
 class LoginController
 {
     private $model;
@@ -16,13 +21,12 @@ class LoginController
     // Zobrazení přihlašovacího formuláře
     public function showLoginForm()
     {
-        //echo password_hash('', PASSWORD_DEFAULT);
         $disableNavbar = true;
-
         $view = '../app/Views/login.php';
         include '../app/Views/Admin/layout/base.php';
     }
 
+    // Přihlášení uživatele
     public function login($email, $password)
     {
         if (session_status() === PHP_SESSION_NONE) {
@@ -43,13 +47,13 @@ class LoginController
 
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['role'] = $user['role'];
+        $_SESSION['email'] = $user['email'];
 
         echo "<script>window.location.href='/admin';</script>";
         exit();
     }
 
-
-    // Odhlášení
+    // Odhlášení uživatele
     public function logout()
     {
         session_start();
@@ -103,30 +107,117 @@ class LoginController
         }
     }
 
+    // Zobrazení formuláře pro reset hesla
     public function reset()
     {
         $view = '../app/Views/Admin/users/reset_password.php';
         include '../app/Views/Admin/layout/base.php';
     }
 
+    // Uloží token a zapíše do logu
     public function resetPassword()
     {
         $email = trim($_POST['email']);
+        $user = $this->model->getByEmail($email);
 
-        // Kontrola, zda e-mail existuje
-        if (!$this->model->checkEmailExists($email)) {
+        if (!$user) {
             echo "<script>alert('Účet s tímto e-mailem neexistuje.'); window.location.href='/reset-password';</script>";
             return;
         }
 
-        // Generování nového hesla
-        $newPassword = bin2hex(random_bytes(4)); // 8 znakové heslo
-        if ($this->model->resetUserPassword($email, $newPassword)) {
-            // Odeslání hesla na e-mail
-            mail($email, "Reset hesla", "Vaše nové heslo je: $newPassword");
-            echo "<script>alert('Vaše nové heslo bylo odesláno na váš e-mail.'); window.location.href='/login';</script>";
+        $token = bin2hex(random_bytes(32));
+        $expiresAt = date('Y-m-d H:i:s', strtotime('+1 hour'));
+
+        if ($this->model->storeResetToken($user['id'], $email, $token, $expiresAt)) {
+            $resetLink = "http://" . $_SERVER['HTTP_HOST'] . "/reset-password?token=" . $token;
+
+            // ✅ Cesta k JSON logu
+            $logFile = __DIR__ . '/../../email_log.json';
+
+            // ✅ Nový záznam
+            $logEntry = [
+                'datum' => date('Y-m-d H:i:s'),
+                'email' => $email,
+                'token' => $token,
+                'expires_at' => $expiresAt,
+                'reset_link' => $resetLink,
+                'popis' => 'Odeslání odkazu pro reset hesla'
+            ];
+
+            // ✅ Načtení stávajících dat, pokud existují
+            $existingLogs = [];
+            if (file_exists($logFile)) {
+                $existingContent = file_get_contents($logFile);
+                $existingLogs = json_decode($existingContent, true) ?? [];
+            }
+
+            // ✅ Přidání nového záznamu do pole
+            $existingLogs[] = $logEntry;
+
+            // ✅ Zápis zpět do souboru v krásném formátu a s podporou češtiny
+            file_put_contents($logFile, json_encode($existingLogs, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+            echo "<script>alert('Odkaz pro reset hesla uložen do logu.'); window.location.href='/login';</script>";
         } else {
-            echo "<script>alert('Chyba při resetu hesla. Zkuste to znovu.'); window.location.href='/reset-password';</script>";
+            echo "<script>alert('Chyba při generování odkazu.'); window.location.href='/reset-password';</script>";
+        }
+    }
+
+    // Potvrdí reset hesla
+    public function confirmResetPassword()
+    {
+        $token = $_GET['token'] ?? null;
+        if (!$token) {
+            echo "<script>alert('Token nebyl poskytnut.'); window.location.href='/login';</script>";
+            return;
+        }
+
+        $resetData = $this->model->getValidResetToken($token);
+        if (!$resetData) {
+            echo "<script>alert('Token je neplatný nebo expirovaný.'); window.location.href='/reset-password';</script>";
+            return;
+        }
+
+        $view = '../app/Views/Admin/users/new_password.php';
+        include '../app/Views/Admin/layout/base.php';
+    }
+
+    public function saveNewPassword()
+    {
+        $token = $_POST['token'] ?? null;
+        $newPassword = $_POST['new_password'] ?? null;
+        $confirmPassword = $_POST['confirm_password'] ?? null;
+
+        if (!$token || !$newPassword || !$confirmPassword) {
+            echo "<script>alert('Chybí token nebo heslo.'); window.location.href='/reset-password';</script>";
+            return;
+        }
+
+        if ($newPassword !== $confirmPassword) {
+            echo "<script>alert('Hesla se neshodují.'); window.history.back();</script>";
+            return;
+        }
+
+        $resetData = $this->model->getValidResetToken($token);
+        if (!$resetData) {
+            echo "<script>alert('Token je neplatný nebo expirovaný.'); window.location.href='/reset-password';</script>";
+            return;
+        }
+
+        // ✅ Kontrola, zda e-mail opravdu existuje v DB
+        $user = $this->model->getByEmail($resetData['email']);
+        if (!$user) {
+            echo "<script>alert('Účet s tímto e-mailem neexistuje.'); window.location.href='/reset-password';</script>";
+            return;
+        }
+
+        // ✅ Aktualizace hesla podle user_id
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        if ($this->model->updatePassword($user['id'], $hashedPassword)) {
+            $this->model->deleteResetToken($token);
+            echo "<script>alert('Heslo bylo úspěšně změněno.'); window.location.href='/login';</script>";
+        } else {
+            echo "<script>alert('Chyba při změně hesla.'); window.location.href='/reset-password';</script>";
         }
     }
 }

@@ -1,0 +1,26 @@
+[
+    {
+        "datum": "2025-02-21 22:24:31",
+        "email": "onvin@seznam.cz",
+        "token": "41af413fbcf26cf8bfd7fc651bbd18be06a4fc1125a1fbde8953312855f75786",
+        "expires_at": "2025-02-21 23:24:31",
+        "reset_link": "http:\/\/cyklistickey.local\/reset-password?token=41af413fbcf26cf8bfd7fc651bbd18be06a4fc1125a1fbde8953312855f75786",
+        "popis": "Odeslání odkazu pro reset hesla"
+    },
+    {
+        "datum": "2025-02-21 22:55:37",
+        "email": "onvin@seznam.cz",
+        "token": "6ba8d9a738d11f06411e51baceb5cf1cb56e9cd059f8ad08be84f2bd37d0de10",
+        "expires_at": "2025-02-21 23:55:37",
+        "reset_link": "http:\/\/cyklistickey.local\/reset-password?token=6ba8d9a738d11f06411e51baceb5cf1cb56e9cd059f8ad08be84f2bd37d0de10",
+        "popis": "Odeslání odkazu pro reset hesla"
+    },
+    {
+        "datum": "2025-02-21 22:59:32",
+        "email": "onvin@seznam.cz",
+        "token": "fe18845a3d169d573c66d0fd87bb219a09d2447c31dac123848c2374e5e940bf",
+        "expires_at": "2025-02-21 23:59:32",
+        "reset_link": "http:\/\/cyklistickey.local\/reset-password?token=fe18845a3d169d573c66d0fd87bb219a09d2447c31dac123848c2374e5e940bf",
+        "popis": "Odeslání odkazu pro reset hesla"
+    }
+]

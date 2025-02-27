@@ -1,0 +1,13 @@
+{
+    "name": "cyklistickey/magazin",
+    "description": "Projekt pro cyklistický magazín",
+    "require": {
+        "phpmailer/phpmailer": "^6.9",
+        "vlucas/phpdotenv": "^5.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    }
+}

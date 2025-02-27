@@ -151,4 +151,51 @@ class User
             return false;
         }
     }
+
+    // Uloží reset token do DB
+    public function storeResetToken($userId, $email, $token, $expiresAt)
+    {
+        $stmt = $this->db->prepare("
+            INSERT INTO password_resets (user_id, email, token, expires_at)
+            VALUES (:user_id, :email, :token, :expires_at)
+        ");
+        return $stmt->execute([
+            ':user_id' => $userId,
+            ':email' => $email,
+            ':token' => $token,
+            ':expires_at' => $expiresAt
+        ]);
+    }
+
+    // Ověří platnost tokenu
+    public function getValidResetToken($token)
+    {
+        $stmt = $this->db->prepare("
+            SELECT pr.*, u.email 
+            FROM password_resets pr
+            JOIN users u ON pr.user_id = u.id
+            WHERE pr.token = :token AND pr.expires_at >= NOW()
+        ");
+        $stmt->execute([':token' => $token]);  // ✅ Musí odpovídat jen `:token`
+        return $stmt->fetch(\PDO::PARAM_STR);
+    }
+
+    // Aktualizuje heslo uživatele
+    public function updatePassword($userId, $hashedPassword)
+    {
+        $stmt = $this->db->prepare("
+            UPDATE users SET heslo = :heslo WHERE id = :id
+        ");
+        return $stmt->execute([':heslo' => $hashedPassword, ':id' => $userId]);
+    }
+
+
+    // Smaže použitý token
+    public function deleteResetToken($token)
+    {
+        $stmt = $this->db->prepare("
+            DELETE FROM password_resets WHERE token = :token
+        ");
+        return $stmt->execute([':token' => $token]);
+    }
 }

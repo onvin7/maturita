@@ -2,7 +2,7 @@
 <ul>
     <?php foreach ($articles as $article): ?>
         <li>
-            <h2><a href="/articles/view/<?= htmlspecialchars($article['id']); ?>"><?= htmlspecialchars($article['nazev']); ?></a></h2>
+            <h2><a href="/articles/view/<?= htmlspecialchars($article['id']); ?>"><?= htmlspecialchars($article['url']); ?></a></h2>
             <p><?= htmlspecialchars($article['datum']); ?></p>
         </li>
     <?php endforeach; ?>

@@ -256,4 +256,18 @@ class Article
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+    public function slugExists($slug, $excludeId = null)
+    {
+        $sql = "SELECT COUNT(*) FROM articles WHERE url = :slug";
+        $params = ['slug' => $slug];
+
+        if ($excludeId !== null) {
+            $sql .= " AND id != :id";
+            $params['id'] = $excludeId;
+        }
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchColumn() > 0;
+    }
 }

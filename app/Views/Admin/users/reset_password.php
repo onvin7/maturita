@@ -6,7 +6,7 @@
                     <h3>Reset hesla</h3>
                 </div>
                 <div class="card-body">
-                    <form action="/reset-password/submit" method="POST">
+                    <form action="/reset-password" method="POST">
                         <div class="mb-3">
                             <label for="email" class="form-label">E-mail</label>
                             <input type="email" name="email" id="email" class="form-control" placeholder="Zadejte váš e-mail" required>
