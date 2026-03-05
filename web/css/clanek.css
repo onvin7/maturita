@@ -530,8 +530,19 @@ body {
   border: none !important;
 }
 
-/* Instagram embed - klasický Instagram design */
-/* Necháme Instagram nastavit své vlastní styly, jen omezíme max-width a zajistíme centrování */
+/* ===== SOCIAL MEDIA EMBEDS STYLING ===== */
+
+/* Common container styling for all embeds to ensure centering and max width */
+.clanek .obsah .social-embed-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-block: 30px;
+}
+
+/* 1. INSTAGRAM (Posts & Reels) */
+/* Instagram handles its own sizing well, we just need to constrain max width */
 .container-zobrazit .text .text-editor blockquote.instagram-media,
 .clanek .obsah blockquote.instagram-media,
 .container-zobrazit .text blockquote.instagram-media,
@@ -539,36 +550,173 @@ body {
 .clanek .obsah blockquote[data-instgrm-permalink],
 .container-zobrazit .text blockquote[data-instgrm-permalink] {
   margin: 20px auto !important;
-  max-width: 80% !important;
+  max-width: 540px !important; /* Instagram standard width */
+  width: 100% !important;
   min-width: 326px !important;
   display: block !important;
-  /* Necháme Instagram nastavit své vlastní background, border, border-radius, box-shadow, padding, width */
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+  /* Ensure height adjusts automatically */
+  height: auto !important; 
 }
 
-/* Instagram iframe (pokud se použije iframe místo blockquote) */
+/* Instagram via Iframe fallback */
 .container-zobrazit .text .text-editor iframe[src*="instagram.com"],
 .clanek .obsah iframe[src*="instagram.com"],
 .container-zobrazit .text iframe[src*="instagram.com"] {
-  max-width: 80% !important;
-  width: auto !important;
+  max-width: 540px !important;
+  width: 100% !important;
   min-width: 326px !important;
   margin: 20px auto !important;
   display: block !important;
   border: none !important;
-  height: auto !important;
-  aspect-ratio: auto !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+  /* Aspect ratio handling isn't perfect for iframes, let content dictate height if possible, or set reasonable default */
 }
 
-/* Twitter embed */
-.container-zobrazit .text blockquote.twitter-tweet {
-  width: 80% !important;
-  max-width: 80% !important;
+
+/* 2. TWITTER / X */
+/* Twitter embeds are responsive by default but need max-width constraint */
+.twitter-tweet {
   margin: 20px auto !important;
+  max-width: 550px !important; /* Standard Twitter width */
+  width: 100% !important;
   display: block !important;
 }
 
-.twitter-tweet {
-  max-width: none !important;
+
+/* 3. FACEBOOK (Post & Video) */
+/* Facebook posts can be varying widths */
+.fb-post, .fb-video {
+  margin: 20px auto !important;
+  display: flex !important;
+  justify-content: center !important;
+  width: 100% !important;
+}
+
+.fb-post span, .fb-video span {
+    margin: 0 auto !important;
+    max-width: 100% !important;
+}
+
+.fb-post iframe, .fb-video iframe {
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+    max-width: 100% !important;
+}
+
+
+/* 4. TIKTOK */
+/* TikTok embeds are vertical mostly */
+.tiktok-embed {
+  margin: 20px auto !important;
+  max-width: 605px !important; /* TikTok max width */
+  min-width: 325px !important;
+  width: 100% !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+  display: block !important;
+}
+
+
+/* 5. YOUTUBE (Video & Shorts) */
+/* YouTube needs a responsive wrapper to maintain 16:9 aspect ratio */
+.clanek .obsah iframe[src*="youtube.com"], 
+.clanek .obsah iframe[src*="youtu.be"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Wrapper for standard 16:9 YouTube video */
+.youtube-embed-wrapper {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+    height: 0;
+    overflow: hidden;
+    max-width: 800px;
+    width: 100%;
+    margin: 30px auto;
+    border-radius: 12px;
+}
+
+/* Wrapper for vertical 9:16 YouTube Shorts */
+.youtube-shorts-wrapper {
+    position: relative;
+    padding-bottom: 177.77%; /* 9:16 Aspect Ratio (16/9 * 100) */
+    height: 0;
+    overflow: hidden;
+    max-width: 315px; /* Limit width so it's not huge on desktop */
+    width: 100%;
+    margin: 30px auto;
+    border-radius: 12px;
+}
+
+
+/* 6. STRAVA */
+/* Strava embeds are fixed size usually, but we make them responsive */
+.strava-embed-placeholder {
+  margin: 30px auto !important;
+  max-width: 590px !important; /* Native Strava width */
+  width: 100% !important;
+  /* Height is set inline by embed code usually */
+}
+
+.strava-embed-placeholder iframe {
+  width: 100% !important;
+  max-width: 100% !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+  /* Allow height to be determined by the attribute */
+}
+
+
+/* 7. REDDIT */
+.reddit-card {
+  margin: 30px auto !important;
+  max-width: 650px !important;
+  width: 100% !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+}
+
+
+/* 8. PINTEREST */
+/* Pinterest embeds can vary (small, medium, large) */
+span[data-pin-log="embed"] {
+  display: block !important;
+  margin: 30px auto !important;
+  text-align: center;
+}
+span[data-pin-log="embed"] > span {
+    border-radius: 12px !important;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+}
+
+
+/* MOBILE ADJUSTMENTS */
+@media screen and (max-width: 600px) {
+    /* Allow embeds to take full width on mobile with small padding */
+    .container-zobrazit .text .text-editor blockquote.instagram-media,
+    .twitter-tweet,
+    .tiktok-embed,
+    .strava-embed-placeholder,
+    .reddit-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important; /* Override min-widths that might cause overflow */
+        margin-inline: 0 !important;
+    }
+    
+    .youtube-embed-wrapper {
+        width: 100% !important;
+    }
 }
 
 .container-zobrazit .text .column {

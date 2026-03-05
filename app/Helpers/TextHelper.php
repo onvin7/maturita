@@ -98,13 +98,19 @@ class TextHelper
             $content
         );
 
-        // 5. YouTube (pokud je jen odkaz, převedeme na iframe)
-        // Pattern: https://www.youtube.com/watch?v=ID nebo https://youtu.be/ID
+        // 5. YouTube (Video & Shorts)
+        // Pattern: https://www.youtube.com/watch?v=ID, https://youtu.be/ID, https://www.youtube.com/shorts/ID
         $content = preg_replace_callback(
-            '/<p>\s*(<a[^>]*>)?\s*(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)(?:[&?][^<\s"]*)?)\s*(<\/a>)?\s*<\/p>/i',
+            '/<p>\s*(<a[^>]*>)?\s*(https?:\/\/(?:www\.)?(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]+)(?:[&?][^<\s"]*)?)\s*(<\/a>)?\s*<\/p>/i',
             function($matches) {
+                $url = $matches[2];
                 $id = $matches[3];
-                return '<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; margin: 20px 0;"><iframe src="https://www.youtube.com/embed/' . $id . '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe></div>';
+                
+                // Detekce Shorts pro správný poměr stran
+                $isShorts = strpos($url, '/shorts/') !== false;
+                $wrapperClass = $isShorts ? 'youtube-shorts-wrapper' : 'youtube-embed-wrapper';
+                
+                return '<div class="' . $wrapperClass . '"><iframe src="https://www.youtube.com/embed/' . $id . '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>';
             },
             $content
         );
