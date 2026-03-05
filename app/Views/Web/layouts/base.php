@@ -262,10 +262,6 @@
 
     include 'header.php';?>
 
-    <?php if (isset($breadcrumbs) && !empty($breadcrumbs)): ?>
-        <?php echo SEOHelper::generateBreadcrumbsHTML($breadcrumbs); ?>
-    <?php endif; ?>
-
     <main>
         <?php include $view; ?>
     </main>
