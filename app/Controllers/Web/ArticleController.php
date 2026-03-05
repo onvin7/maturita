@@ -149,17 +149,19 @@ class ArticleController
             $structuredData[] = SEOHelper::generateImageSchema($ogImage, $title, $description);
         }
         
-        // Absolutní cesta k audio souboru
-        $audioFilePath = __DIR__ . '/../../../web/uploads/audio/' . $article['id'] . '.mp3';
-            
-        // Vypneme zobrazení chyb při kontrole existence souboru
-        $fileExists = @file_exists($audioFilePath);
-        
-        // Nastavíme cestu pro přehrávač pouze pokud soubor existuje
-        if ($fileExists) {
-            $audioUrl = '/uploads/audio/' . $article['id'] . '.mp3';
+        // Načtení audio z databáze, pokud existuje
+        if (!empty($article['audio'])) {
+            $audioUrl = $article['audio'];
         } else {
-            $audioUrl = null;
+            // Zpětná kompatibilita: kontrola existence souboru na disku
+            $audioFilePath = __DIR__ . '/../../../web/uploads/audio/' . $article['id'] . '.mp3';
+            $fileExists = @file_exists($audioFilePath);
+            
+            if ($fileExists) {
+                $audioUrl = '/uploads/audio/' . $article['id'] . '.mp3';
+            } else {
+                $audioUrl = null;
+            }
         }
         
         // Cesta k empty_clanek.php pro případ, že nejsou nalezeny žádné články

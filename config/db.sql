@@ -61,6 +61,7 @@ CREATE TABLE `clanky` (
   `datum` datetime NOT NULL,
   `viditelnost` tinyint(1) NOT NULL,
   `nahled_foto` varchar(255) DEFAULT NULL,
+  `audio` varchar(255) DEFAULT NULL COMMENT 'Cesta k audio souboru článku',
   `obsah` text NOT NULL,
   `user_id` int(10) NOT NULL,
   `url` varchar(255) NOT NULL

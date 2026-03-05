@@ -531,22 +531,18 @@ body {
 }
 
 /* Instagram embed - klasický Instagram design */
+/* Necháme Instagram nastavit své vlastní styly, jen omezíme max-width a zajistíme centrování */
 .container-zobrazit .text .text-editor blockquote.instagram-media,
 .clanek .obsah blockquote.instagram-media,
 .container-zobrazit .text blockquote.instagram-media,
 .container-zobrazit .text .text-editor blockquote[data-instgrm-permalink],
 .clanek .obsah blockquote[data-instgrm-permalink],
 .container-zobrazit .text blockquote[data-instgrm-permalink] {
-  background: #fff !important;
-  border: 0 !important;
-  border-radius: 3px !important;
-  box-shadow: 0 0 1px 0 rgba(0,0,0,.5), 0 1px 10px 0 rgba(0,0,0,.15) !important;
   margin: 20px auto !important;
   max-width: 80% !important;
   min-width: 326px !important;
-  padding: 0 !important;
-  width: calc(100% - 2px) !important;
   display: block !important;
+  /* Necháme Instagram nastavit své vlastní background, border, border-radius, box-shadow, padding, width */
 }
 
 /* Instagram iframe (pokud se použije iframe místo blockquote) */

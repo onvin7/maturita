@@ -161,10 +161,14 @@ class ArticleAdminController
                 $this->articleModel->addCategories($articleId, [1]);
             }
             
-            // Pokud byl nahrán zvukový soubor, přejmenujeme ho podle ID článku
+            // Pokud byl nahrán zvukový soubor, přejmenujeme ho podle ID článku a uložíme do DB
             if ($audioFile) {
                 $finalAudioPath = $audioDir . $articleId . '.mp3';
                 rename($audioDir . $audioFile, $finalAudioPath);
+                
+                // Uložit cestu k audio souboru do databáze
+                $audioDbPath = '/uploads/audio/' . $articleId . '.mp3';
+                $this->articleModel->saveArticleAudio($articleId, $audioDbPath);
             }
             
             LogHelper::admin('Article created', 'ID: ' . $articleId . ', Title: ' . ($postData['nazev'] ?? 'N/A'));
@@ -276,6 +280,11 @@ class ArticleAdminController
             
             if (move_uploaded_file($_FILES['audio_file']['tmp_name'], $audioPath)) {
                 @LogHelper::admin('Article audio uploaded (update)', 'Article ID: ' . $id . ', File: ' . basename($audioPath) . ', Size: ' . $_FILES['audio_file']['size'] . ' bytes');
+                
+                // Uložit cestu k audio souboru do databáze
+                $audioDbPath = '/uploads/audio/' . $id . '.mp3';
+                $this->articleModel->saveArticleAudio($id, $audioDbPath);
+                
                 echo "<p>Zvukový soubor byl úspěšně aktualizován.</p>";
             } else {
                 echo "<div class='alert alert-danger'>❌ Chyba při nahrávání zvukového souboru!</div>";
@@ -406,10 +415,15 @@ class ArticleAdminController
             }
         }
 
-        // Kontrola audio souboru
-        $audioFilePath = __DIR__ . '/../../../web/uploads/audio/' . $article['id'] . '.mp3';
-        $fileExists = @file_exists($audioFilePath);
-        $audioUrl = $fileExists ? '/uploads/audio/' . $article['id'] . '.mp3' : null;
+        // Načtení audio z databáze, pokud existuje
+        if (!empty($article['audio'])) {
+            $audioUrl = $article['audio'];
+        } else {
+            // Zpětná kompatibilita: kontrola existence souboru na disku
+            $audioFilePath = __DIR__ . '/../../../web/uploads/audio/' . $article['id'] . '.mp3';
+            $fileExists = @file_exists($audioFilePath);
+            $audioUrl = $fileExists ? '/uploads/audio/' . $article['id'] . '.mp3' : null;
+        }
 
         // Přidání trackingu k odkazům
         if (isset($article['obsah'])) {

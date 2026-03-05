@@ -1,8 +1,5 @@
 # TODO - Seznam úkolů a poznámek
 
-## ❗️ Meta úkol (přeskočit, jít cvičit)
-- [ ] Pokud tohle čteš, nech práci chvíli být a jdi si dát gymnastiku
-
 ---
 
 ## 🚀 ČÁST 1 - SPUŠTĚNÍ WEBU
