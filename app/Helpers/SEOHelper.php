@@ -346,7 +346,7 @@ class SEOHelper
             return '';
         }
         
-        $html = '<nav aria-label="Breadcrumb" class="breadcrumbs">';
+        $html = '<nav class="breadcrumbs">';
         $html .= '<ol class="breadcrumb-list">';
         
         foreach ($breadcrumbs as $index => $breadcrumb) {
