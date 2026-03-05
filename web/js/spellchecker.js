@@ -44,7 +44,7 @@ class SpellChecker {
         const wordCount = parseInt(lines[0]);
         
         // Načte slova (omezeně pro výkon)
-        const maxWords = Math.min(wordCount, 50000); // Omezení pro výkon
+        const maxWords = Math.min(wordCount, 100000); // Zvýšeno na 100k
         
         for (let i = 1; i < lines.length && i <= maxWords; i++) {
             const line = lines[i].trim();
@@ -54,7 +54,7 @@ class SpellChecker {
                 const word = parts[0].toLowerCase();
                 
                 // Přidá pouze slova s českými znaky nebo běžná slova
-                if (word.length > 1 && /^[a-záčďéěíňóřšťúůýž]+$/.test(word)) {
+                if (word.length > 1) {
                     words.add(word);
                 }
             }
@@ -91,12 +91,12 @@ class SpellChecker {
     extractWords(text) {
         // Odstraní HTML tagy a extrahuje slova
         const cleanText = text.replace(/<[^>]*>/g, ' ')
-                             .replace(/[^\w\s]/g, ' ')
+                             .replace(/[^\w\s\u00C0-\u024F\u1E00-\u1EFF]/g, ' ') // Zachovat diakritiku
                              .toLowerCase();
         
         const words = cleanText.split(/\s+/)
-                              .filter(word => word.length > 2)
-                              .filter(word => /^[a-záčďéěíňóřšťúůýž]+$/.test(word));
+                              .filter(word => word.length > 1)
+                              .filter(word => !/^\d+$/.test(word)); // Ignorovat čísla
         
         return [...new Set(words)]; // Odstraní duplicity
     }
@@ -132,11 +132,11 @@ class SpellChecker {
         const variants = [];
         
         // Odstranění koncovek (základní implementace)
-        const endings = ['y', 'é', 'í', 'á', 'ů', 'ě', 'i', 'e', 'a', 'o', 'u'];
+        const endings = ['y', 'é', 'í', 'á', 'ů', 'ě', 'i', 'e', 'a', 'o', 'u', 'ou', 'ech', 'ách', 'em', 'ami', 'ovi'];
         
         for (const ending of endings) {
             if (word.endsWith(ending)) {
-                variants.push(word.slice(0, -1));
+                variants.push(word.slice(0, -ending.length));
             }
         }
         
@@ -158,33 +158,88 @@ class SpellChecker {
     }
 
     /**
-     * Zvýrazní chyby v editoru
+     * Zvýrazní chyby v editoru (Bezpečně přes DOM)
      */
     highlightErrors(editor, misspelledWords) {
         // Odstraní předchozí zvýraznění
         this.removeHighlighting(editor);
         
-        const content = editor.getContent();
-        let newContent = content;
-        
-        for (const word of misspelledWords) {
-            // Vytvoří regex pro hledání slova (case insensitive)
-            const regex = new RegExp(`\\b${this.escapeRegex(word)}\\b`, 'gi');
-            
-            // Nahradí slovo zvýrazněnou verzí
-            newContent = newContent.replace(regex, `<span class="spell-error" style="background-color: #ffcccc; border-bottom: 2px solid #ff0000; cursor: help;" title="Možná chyba pravopisu: ${word}">$&</span>`);
+        const body = editor.getBody();
+        const walker = document.createTreeWalker(
+            body,
+            NodeFilter.SHOW_TEXT,
+            null,
+            false
+        );
+
+        const nodesToReplace = [];
+        let node;
+
+        while (node = walker.nextNode()) {
+            // Ignorovat script a style tagy
+            if (node.parentElement && (node.parentElement.tagName === 'SCRIPT' || node.parentElement.tagName === 'STYLE')) {
+                continue;
+            }
+
+            let text = node.nodeValue;
+            let hasError = false;
+
+            // Kontrola, zda text obsahuje chybná slova
+            for (const word of misspelledWords) {
+                // Regex pro celé slovo, case insensitive
+                const regex = new RegExp(`\\b(${this.escapeRegex(word)})\\b`, 'gi');
+                if (regex.test(text)) {
+                    hasError = true;
+                    break;
+                }
+            }
+
+            if (hasError) {
+                nodesToReplace.push(node);
+            }
         }
-        
-        editor.setContent(newContent);
+
+        // Nahrazení textových uzlů HTML obsahem se zvýrazněním
+        nodesToReplace.forEach(node => {
+            let html = this.escapeHtml(node.nodeValue);
+            
+            for (const word of misspelledWords) {
+                const regex = new RegExp(`\\b(${this.escapeRegex(word)})\\b`, 'gi');
+                html = html.replace(regex, '<span class="spell-error" style="background-color: #ffcccc; border-bottom: 2px solid #ff0000; cursor: help;" title="Možná chyba pravopisu: $1">$1</span>');
+            }
+            
+            const span = editor.dom.create('span', {'data-spell-check': 'true'}, html);
+            // Protože nodeValue je čistý text, ale my vkládáme HTML, musíme to udělat takto:
+            // Vytvoříme dočasný element, vložíme HTML a nahradíme původní node
+            const tempDiv = editor.dom.create('div', null, html);
+            
+            // Nahrazení původního uzlu novými uzly (protože html může obsahovat více elementů)
+            const parent = node.parentNode;
+            while (tempDiv.firstChild) {
+                parent.insertBefore(tempDiv.firstChild, node);
+            }
+            parent.removeChild(node);
+        });
     }
 
     /**
      * Odstraní zvýraznění chyb
      */
     removeHighlighting(editor) {
-        const content = editor.getContent();
-        const newContent = content.replace(/<span class="spell-error"[^>]*>(.*?)<\/span>/gi, '$1');
-        editor.setContent(newContent);
+        const body = editor.getBody();
+        const errors = body.querySelectorAll('.spell-error');
+        
+        errors.forEach(span => {
+            const parent = span.parentNode;
+            // Nahradí span jeho textovým obsahem
+            while (span.firstChild) {
+                parent.insertBefore(span.firstChild, span);
+            }
+            parent.removeChild(span);
+        });
+        
+        // Spojit sousední textové uzly (volitelné, pro čistotu DOM)
+        body.normalize();
     }
 
     /**
@@ -192,6 +247,20 @@ class SpellChecker {
      */
     escapeRegex(string) {
         return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    /**
+     * Escapuje HTML entity
+     */
+    escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
     }
 
     /**

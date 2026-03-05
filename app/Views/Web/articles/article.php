@@ -6,8 +6,15 @@ use App\Helpers\TextHelper;
 
 <div class="container-zobrazit">
 
-    <div id="lightbox" onclick="this.style.display='none'">
-        <img loading="lazy" src="#" id="lightbox-img" alt="Fullscreen image">
+    <div id="lightbox">
+        <button id="lightbox-close">&times;</button>
+        <div id="lightbox-counter"></div>
+        <div id="lightbox-content">
+            <button id="lightbox-prev" class="lightbox-btn">&lt;</button>
+            <img loading="lazy" src="#" id="lightbox-img" alt="Fullscreen image">
+            <button id="lightbox-next" class="lightbox-btn">&gt;</button>
+        </div>
+        <div id="lightbox-thumbnails"></div>
     </div>
 
     <div class="foto-header">
@@ -203,18 +210,6 @@ use App\Helpers\TextHelper;
         $(window).resize(updateParallax).trigger('resize');
     });
 
-    $(document).ready(function() {
-        $('.text').on('click', 'img', function() {
-            var src = $(this).attr('src');
-            $('#lightbox-img').attr('src', src);
-            $('#lightbox').show();
-        });
-
-        $('#lightbox-img').on('click', function(e) {
-            $('#lightbox').hide();
-            e.stopPropagation();
-        });
-    });
 </script>
 
 

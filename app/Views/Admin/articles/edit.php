@@ -13,6 +13,8 @@
                     <input type="text" class="form-control" id="nazev" name="nazev" value="<?= htmlspecialchars($article['nazev']) ?>" required>
                 </div>
 
+                <!-- URL adresa (slug) se generuje/aktualizuje automaticky na pozadí -->
+
                 <div class="mb-3">
                     <label for="kategorie" class="form-label">Kategorie</label>
                     <div class="category-select-container">

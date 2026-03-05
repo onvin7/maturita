@@ -138,7 +138,20 @@ class ArticleAdminController
             }
         }
 
-        $slug = TextHelper::generateFriendlyUrl($postData['nazev']);
+        // Generování a kontrola URL (slug)
+        if (!empty($postData['url'])) {
+            $baseSlug = TextHelper::generateFriendlyUrl($postData['url']);
+        } else {
+            $baseSlug = TextHelper::generateFriendlyUrl($postData['nazev']);
+        }
+
+        // Kontrola duplicity slugu
+        $slug = $baseSlug;
+        $counter = 1;
+        while ($this->articleModel->getByUrl($slug)) {
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
 
         $data = [
             'nazev' => $postData['nazev'],
@@ -299,7 +312,38 @@ class ArticleAdminController
                ? date('Y-m-d H:i:s', strtotime($postData['datum_publikace'])) 
                : $originalArticle['datum'];
         
-        $slug = TextHelper::generateFriendlyUrl($postData['nazev']);
+        // Generování a kontrola URL (slug) - pouze pokud se změní název a URL nebylo zadáno ručně (což teď není)
+        // nebo pokud je URL prázdné
+        if (!empty($postData['url'])) {
+            $baseSlug = TextHelper::generateFriendlyUrl($postData['url']);
+        } else {
+            // Pokud URL není zadáno (což není, protože jsme smazali input), 
+            // zachováme původní URL, pokud se nezměnil název, 
+            // nebo pokud chceme, aby URL bylo "sticky" (jednou vytvořené se nemění)
+            
+            // Strategie: URL se nemění automaticky při editaci, aby se nerozbily odkazy.
+            // Pokud by uživatel chtěl změnit URL, musel by to udělat explicitně (ale input jsme skryli).
+            // Takže při update zachováme původní slug.
+            $baseSlug = $originalArticle['url'];
+            
+            // Pokud by původní slug byl prázdný (což by neměl být), vygenerujeme ho z názvu
+            if (empty($baseSlug)) {
+                $baseSlug = TextHelper::generateFriendlyUrl($postData['nazev']);
+            }
+        }
+        
+        // Kontrola duplicity slugu (vyjma aktuálního článku)
+        $slug = $baseSlug;
+        $counter = 1;
+        // Zkontrolujeme, zda slug existuje u JINÉHO článku
+        while ($existingArticle = $this->articleModel->getByUrl($slug)) {
+            if ($existingArticle['id'] != $id) {
+                $slug = $baseSlug . '-' . $counter;
+                $counter++;
+            } else {
+                break; // Slug patří tomuto článku, je to OK
+            }
+        }
 
         $data = [
             'id' => $id,

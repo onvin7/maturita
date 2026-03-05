@@ -172,7 +172,8 @@ class ArticleController
             $article['obsah'] = LinkTrackingHelper::addTrackingToLinks($article['obsah'], $article['id']);
         }
 
-        $css = ["main-page", "clanek", "autor_clanku"];
+        $css = ["main-page", "clanek", "autor_clanku", "lightbox"];
+        $script = ["gallery-lightbox"];
 
         $view = '../app/Views/Web/articles/article.php';
         require '../app/Views/Web/layouts/base.php';

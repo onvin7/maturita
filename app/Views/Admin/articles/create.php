@@ -11,6 +11,8 @@
                     <input type="text" class="form-control" id="nazev" name="nazev" placeholder="Zadejte název článku" required>
                 </div>
 
+                <!-- URL adresa (slug) se generuje automaticky na pozadí -->
+
                 <div class="mb-3">
                     <label for="kategorie" class="form-label">Kategorie</label>
                     <div class="category-select-container">

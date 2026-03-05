@@ -221,7 +221,7 @@
 
     <?php if (isset($script) && is_array($script)): ?>
         <?php foreach ($script as $i): ?>
-            <link rel="stylesheet" href="/js/<?php echo $i; ?>.js">
+            <script src="/js/<?php echo $i; ?>.js"></script>
         <?php endforeach; ?>
     <?php endif; ?>
 

@@ -1,0 +1,206 @@
+
+/* ===== GALLERY GRID SYSTEM ===== */
+/* Zvýšíme specifičnost, aby to přebilo staré styly v clanek.css */
+.text-editor .gallery-grid,
+.gallery-grid {
+    display: grid !important; /* Vynucení gridu místo flexu */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px !important;
+    margin-block: 30px;
+    width: 100%;
+}
+
+@media (min-width: 768px) {
+    .text-editor .gallery-grid,
+    .gallery-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+    
+    /* Specific layouts for small numbers of images */
+    .gallery-grid[data-count="1"] { grid-template-columns: 1fr; }
+    .gallery-grid[data-count="2"] { grid-template-columns: 1fr 1fr; }
+    .gallery-grid[data-count="3"] { grid-template-columns: 1fr 1fr 1fr; }
+    /* For 4+ we use the auto-fit behavior */
+}
+
+.text-editor .gallery-grid img,
+.gallery-grid img {
+    width: 100% !important; /* Vynucení šířky na grid buňku */
+    height: 250px !important; /* Fixed height for uniformity */
+    object-fit: cover !important;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    margin: 0 !important; /* Override default article img margin */
+}
+
+.text-editor .gallery-grid img:hover,
+.gallery-grid img:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Container for the image with overlay */
+.text-editor .gallery-item-wrapper,
+.gallery-item-wrapper {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    height: 250px !important;
+}
+
+.text-editor .gallery-item-wrapper img,
+.gallery-item-wrapper img {
+    height: 100% !important;
+    width: 100% !important;
+    object-fit: cover !important;
+}
+
+.gallery-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.gallery-overlay:hover {
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* ===== ENHANCED LIGHTBOX ===== */
+#lightbox {
+    display: none;
+    position: fixed;
+    z-index: 2000000000;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+}
+
+#lightbox.active {
+    display: flex;
+}
+
+#lightbox-content {
+    position: relative;
+    width: 100%;
+    height: 80%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#lightbox-img {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+    border-radius: 4px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    position: relative; /* Reset absolute positioning from old css */
+    transform: none;
+    top: auto;
+    right: auto;
+}
+
+/* Controls */
+.lightbox-btn {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: none;
+    font-size: 2rem;
+    padding: 20px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lightbox-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+#lightbox-prev { left: 20px; }
+#lightbox-next { right: 20px; }
+
+#lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: transparent;
+    font-size: 2.5rem;
+    padding: 10px;
+}
+
+#lightbox-counter {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    color: white;
+    font-size: 1.2rem;
+    font-family: monospace;
+    background: rgba(0,0,0,0.5);
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+/* Thumbnails strip */
+#lightbox-thumbnails {
+    height: 15%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    overflow-x: auto;
+    background: rgba(0,0,0,0.3);
+}
+
+.lightbox-thumb {
+    height: 80%;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+    border-radius: 4px;
+    opacity: 0.5;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
+    border: 2px solid transparent;
+}
+
+.lightbox-thumb:hover {
+    opacity: 0.8;
+    transform: scale(1.05);
+}
+
+.lightbox-thumb.active {
+    opacity: 1;
+    border-color: #f1008d;
+}
+
+/* Hide navigation on single image */
+#lightbox.single .lightbox-btn,
+#lightbox.single #lightbox-thumbnails,
+#lightbox.single #lightbox-counter {
+    display: none;
+}

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <title>Brutální Test SpellCheckeru</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .test-case { margin-bottom: 20px; border: 1px solid #ccc; padding: 10px; }
+        .editor-mock { border: 1px solid #333; padding: 10px; min-height: 100px; background: #fff; }
+        .status { font-weight: bold; }
+        .success { color: green; }
+        .failure { color: red; }
+        .spell-error { background-color: #ffcccc; border-bottom: 2px solid #ff0000; }
+    </style>
+</head>
+<body>
+    <h1>🛡️ Brutální Test SpellCheckeru</h1>
+    <div id="results"></div>
+
+    <!-- Mock TinyMCE Editor -->
+    <div id="editor-container" style="display:none;"></div>
+
+    <script src="/js/spellchecker.js"></script>
+    <script>
+        // Mock TinyMCE API
+        class MockEditor {
+            constructor(initialContent) {
+                this.element = document.createElement('div');
+                this.element.innerHTML = initialContent;
+                this.element.contentEditable = true;
+                this.element.className = 'editor-mock';
+                document.getElementById('editor-container').appendChild(this.element);
+                
+                this.dom = {
+                    create: (tag, attrs, content) => {
+                        const el = document.createElement(tag);
+                        if (attrs) {
+                            for (let k in attrs) el.setAttribute(k, attrs[k]);
+                        }
+                        if (content) el.innerHTML = content;
+                        return el;
+                    }
+                };
+            }
+
+            getBody() {
+                return this.element;
+            }
+
+            getContent() {
+                return this.element.innerHTML;
+            }
+
+            setContent(html) {
+                this.element.innerHTML = html;
+            }
+        }
+
+        async function runTests() {
+            const results = document.getElementById('results');
+            const log = (msg, type = 'info') => {
+                const div = document.createElement('div');
+                div.className = `status ${type}`;
+                div.innerHTML = msg;
+                results.appendChild(div);
+                console.log(`[${type.toUpperCase()}] ${msg.replace(/<[^>]+>/g, '')}`);
+            };
+
+            const spellChecker = new SpellChecker();
+            
+            // Mock dictionary loading for testing specific edge cases
+            // We force load a small dictionary to ensure deterministic tests
+            spellChecker.dictionary = new Set(['ahoj', 'svět', 'test', 'je', 'funkční']);
+            spellChecker.isLoaded = true;
+
+            log('🚀 Spouštím brutální testy...', 'info');
+
+            // TEST 1: Basic functionality
+            try {
+                const text = "Ahoj svět, toto je tst.";
+                const errors = spellChecker.checkText(text);
+                if (errors.includes('tst') && errors.includes('toto')) {
+                    log('✅ Test 1 (Základní detekce): OK', 'success');
+                } else {
+                    log(`❌ Test 1 (Základní detekce): SELHAL. Nalezeno: ${JSON.stringify(errors)}`, 'failure');
+                }
+            } catch (e) { log(`❌ Test 1 Chyba: ${e.message}`, 'failure'); }
+
+            // TEST 2: HTML Tags overlapping
+            // Bug scenario: If "span" or "class" is flagged as error, does it break HTML?
+            try {
+                // Force "span" and "class" to be errors by not having them in dictionary
+                const editor = new MockEditor('<p>Tento <span class="test">text</span> má styl.</p>');
+                const misspelled = ['span', 'class', 'text']; // 'text' is error, 'span'/'class' shouldn't be touched in HTML tags
+                
+                // We intentionally try to highlight "span" and "class" if they were found in text
+                // But wait, checkText strips tags, so "span" inside <> won't be returned by checkText.
+                // However, if the user writes "span" in the text: "Mám rád tag span."
+                
+                const textWithKeywords = 'Mám rád tag span a atribut class.';
+                const editor2 = new MockEditor(`<p>${textWithKeywords}</p>`);
+                
+                spellChecker.highlightErrors(editor2, ['span', 'class']);
+                const html = editor2.getContent();
+                
+                if (html.includes('<span class="spell-error" ...>span</span>') || html.includes('data-spell-check="true"')) {
+                    // Check if HTML is broken
+                    if (html.includes('<<span') || html.includes('class="<span')) {
+                        log('❌ Test 2 (HTML Injection): SELHAL - Rozbité HTML tagy!', 'failure');
+                        log(`Výstup: ${html.replace(/</g, '&lt;')}`, 'info');
+                    } else {
+                        log('✅ Test 2 (HTML Injection): OK - HTML zůstalo validní', 'success');
+                    }
+                }
+            } catch (e) { log(`❌ Test 2 Chyba: ${e.message}`, 'failure'); }
+
+            // TEST 3: Recursive Replacement Bug
+            // If we have "bad" and "superbad". 
+            try {
+                const editor = new MockEditor('To je superbad den.');
+                // If "superbad" is flagged, and "bad" is also flagged.
+                // Current logic might replace inside.
+                spellChecker.highlightErrors(editor, ['superbad', 'bad']);
+                const html = editor.getContent();
+                
+                // Should contain one span for superbad, OR one for bad inside?
+                // Ideally just highlight "superbad". 
+                // If the logic is dumb, it might do: <span...>super<span...>bad</span></span> - which is valid HTML but messy.
+                // Or if regex is naive: <span...>superbad</span>.
+                // If we search for "bad" inside "<span...>superbad</span>", we might break the tag if "span" contains "bad"? No.
+                // But if the class name contained the word? "spell-error" contains "error".
+                
+                spellChecker.highlightErrors(editor, ['error']); // "error" is in class="spell-error"
+                const html2 = editor.getContent();
+                
+                if (html2.includes('spell-<span')) {
+                     log('❌ Test 3 (Rekurzivní nahrazování v atributech): SELHAL - Nahradilo se slovo uvnitř class atributu!', 'failure');
+                } else {
+                     log('✅ Test 3 (Rekurzivní nahrazování): OK', 'success');
+                }
+            } catch (e) { log(`❌ Test 3 Chyba: ${e.message}`, 'failure'); }
+
+            // TEST 4: Diakritika a speciální znaky
+            try {
+                const text = "Příliš žluťoučký kůň úpěl ďábelské ódy.";
+                const editor = new MockEditor(text);
+                // "kůň" is error (not in our small dict)
+                spellChecker.highlightErrors(editor, ['kůň', 'ďábelské']);
+                
+                const html = editor.getContent();
+                if (html.includes('>kůň<') && html.includes('>ďábelské<')) {
+                    log('✅ Test 4 (Diakritika): OK', 'success');
+                } else {
+                    log('❌ Test 4 (Diakritika): SELHAL', 'failure');
+                }
+            } catch (e) { log(`❌ Test 4 Chyba: ${e.message}`, 'failure'); }
+            
+             // TEST 5: Numbers and Code
+            try {
+                const text = "Rok 2024 je super. <code>var x = 1;</code>";
+                const extracted = spellChecker.extractWords(text);
+                
+                if (extracted.includes('2024')) {
+                     log('❌ Test 5 (Čísla): SELHAL - Čísla by se neměla kontrolovat', 'failure');
+                } else {
+                     log('✅ Test 5 (Čísla): OK', 'success');
+                }
+            } catch (e) { log(`❌ Test 5 Chyba: ${e.message}`, 'failure'); }
+        }
+
+        // Run tests automatically
+        runTests();
+    </script>
+</body>
+</html>
