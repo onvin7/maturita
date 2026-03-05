@@ -20,7 +20,7 @@ function initTinyMCE() {
         selector: '#editor',
         plugins: 'image link lists code',
         menubar: false, // Skrýt menu bar (první řádek)
-        toolbar: 'undo redo | styles | bold italic underline | alignleft aligncenter alignright | bullist numlist | image imagesgallery | link | code | customspellcheck removespellcheck',
+        toolbar: 'undo redo | styles | bold italic underline | alignleft aligncenter alignright | bullist numlist | image imagesgallery | socialembed | link | code | customspellcheck removespellcheck',
         height: 500,
         automatic_uploads: true,
         file_picker_types: 'image',
@@ -135,6 +135,60 @@ function initTinyMCE() {
                             // Vložení do editoru
                             editor.insertContent(html);
                             api.close();
+                        }
+                    });
+                }
+            });
+
+            // Přidání tlačítka pro vložení sociálních sítí (Social Embed)
+            editor.ui.registry.addButton('socialembed', {
+                text: '🔗 Embed',
+                tooltip: 'Vložit příspěvek ze sociálních sítí (Instagram, Twitter, Facebook, TikTok, YouTube, Strava, Reddit)',
+                onAction: function() {
+                    editor.windowManager.open({
+                        title: 'Vložit příspěvek ze sociálních sítí',
+                        body: {
+                            type: 'panel',
+                            items: [
+                                {
+                                    type: 'htmlpanel',
+                                    html: '<p style="margin-bottom: 10px;">Vložte odkaz na příspěvek ze sociální sítě. Podporované sítě:</p><ul style="margin-bottom: 15px; font-size: 0.9em;"><li>Instagram (Post, Reel)</li><li>Twitter / X</li><li>Facebook (Post, Video)</li><li>TikTok</li><li>YouTube (Video, Shorts)</li><li>Strava (Activity)</li><li>Reddit</li><li>Threads</li><li>Pinterest</li></ul>'
+                                },
+                                {
+                                    type: 'input',
+                                    name: 'url',
+                                    label: 'URL adresa příspěvku',
+                                    placeholder: 'https://www.instagram.com/p/...'
+                                }
+                            ]
+                        },
+                        buttons: [
+                            {
+                                type: 'cancel',
+                                text: 'Zrušit'
+                            },
+                            {
+                                type: 'submit',
+                                text: 'Vložit',
+                                primary: true
+                            }
+                        ],
+                        onSubmit: function(api) {
+                            const data = api.getData();
+                            const url = data.url.trim();
+                            
+                            if (!url) {
+                                editor.windowManager.alert('Prosím zadejte URL adresu.');
+                                return;
+                            }
+                            
+                            // Vložíme URL do editoru jako odstavec s odkazem
+                            // Backend (TextHelper) se postará o převod na embed
+                            const content = '<p><a href="' + url + '">' + url + '</a></p>';
+                            editor.insertContent(content);
+                            
+                            api.close();
+                            editor.windowManager.alert('Odkaz byl vložen. Po uložení článku se automaticky zobrazí jako náhled (embed).');
                         }
                     });
                 }

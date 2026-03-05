@@ -49,7 +49,8 @@ use App\Helpers\TextHelper;
         <div class="text-editor">
             <?php
             if (isset($article['obsah'])) {
-                echo $article['obsah'];
+                // Zpracování embedů (Instagram, Twitter, Facebook, TikTok, YouTube)
+                echo TextHelper::processEmbeds($article['obsah']);
             } else {
                 include $emptyArticlePath;
             }
@@ -114,6 +115,62 @@ use App\Helpers\TextHelper;
                         if (window.twttr && window.twttr.widgets) {
                             window.twttr.widgets.load();
                         }
+                    }
+                }
+
+                // Načíst Facebook SDK, pokud je v obsahu Facebook embed
+                if (document.querySelector('.fb-post, .fb-video')) {
+                    // Přidat fb-root element, pokud neexistuje
+                    if (!document.getElementById('fb-root')) {
+                        const fbRoot = document.createElement('div');
+                        fbRoot.id = 'fb-root';
+                        document.body.prepend(fbRoot);
+                    }
+
+                    if (!document.getElementById('facebook-jssdk')) {
+                        const script = document.createElement('script');
+                        script.id = 'facebook-jssdk';
+                        script.src = "https://connect.facebook.net/cs_CZ/sdk.js#xfbml=1&version=v18.0";
+                        script.async = true;
+                        script.defer = true;
+                        script.crossOrigin = "anonymous";
+                        document.head.appendChild(script);
+                    } else {
+                        if (window.FB) {
+                            window.FB.XFBML.parse();
+                        }
+                    }
+                }
+
+                // Načíst TikTok embed script
+                if (document.querySelector('.tiktok-embed')) {
+                    if (!document.querySelector('script[src*="tiktok.com/embed.js"]')) {
+                        const script = document.createElement('script');
+                        script.src = 'https://www.tiktok.com/embed.js';
+                        script.async = true;
+                        document.head.appendChild(script);
+                    }
+                }
+
+                // Načíst Reddit embed script
+                if (document.querySelector('.reddit-card')) {
+                    if (!document.querySelector('script[src*="embed.reddit.com/widgets.js"]')) {
+                        const script = document.createElement('script');
+                        script.src = 'https://embed.reddit.com/widgets.js';
+                        script.async = true;
+                        script.charset = 'UTF-8';
+                        document.head.appendChild(script);
+                    }
+                }
+
+                // Načíst Pinterest script
+                if (document.querySelector('[data-pin-do]')) {
+                    if (!document.querySelector('script[src*="assets.pinterest.com/js/pinit.js"]')) {
+                        const script = document.createElement('script');
+                        script.src = '//assets.pinterest.com/js/pinit.js';
+                        script.async = true;
+                        script.defer = true;
+                        document.head.appendChild(script);
                     }
                 }
             });
