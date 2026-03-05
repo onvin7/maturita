@@ -552,7 +552,7 @@ body {
   margin: 20px auto !important;
   max-width: 540px !important; /* Instagram standard width */
   width: 100% !important;
-  min-width: 326px !important;
+  min-width: 0 !important; /* Allow shrinking below 326px on very small screens */
   display: block !important;
   border-radius: 12px !important;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
@@ -560,13 +560,13 @@ body {
   height: auto !important; 
 }
 
-/* Instagram via Iframe fallback */
+/* Instagram iframe (pokud se použije iframe místo blockquote) */
 .container-zobrazit .text .text-editor iframe[src*="instagram.com"],
 .clanek .obsah iframe[src*="instagram.com"],
 .container-zobrazit .text iframe[src*="instagram.com"] {
   max-width: 540px !important;
   width: 100% !important;
-  min-width: 326px !important;
+  min-width: 0 !important; /* Allow shrinking */
   margin: 20px auto !important;
   display: block !important;
   border: none !important;
@@ -716,6 +716,15 @@ span[data-pin-log="embed"] > span {
     
     .youtube-embed-wrapper {
         width: 100% !important;
+    }
+
+    /* Zajištění, že iframy a blockquotes nepřetečou viewport */
+    .clanek .obsah iframe,
+    .clanek .obsah blockquote,
+    .container-zobrazit .text iframe,
+    .container-zobrazit .text blockquote {
+        max-width: 100vw !important;
+        box-sizing: border-box !important;
     }
 }
 
