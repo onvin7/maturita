@@ -397,8 +397,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             if (files.length === 0) return;
 
                             const filesToUpload = [];
-                            // Pokud nahráváme do posledního prázdného slotu, chceme ho nahradit a pak přidat další
-                            // Ale loop níže to řeší posouváním indexu
                             
                             for (let i = 0; i < files.length; i++) {
                                 const targetIndex = startIndex + i;
@@ -410,8 +408,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                 while (targetIndex >= uploadedImages.length) {
                                     uploadedImages.push(null);
                                 }
+                                // Nastavit placeholder pro loading stav
+                                uploadedImages[targetIndex] = 'loading';
                             }
                             
+                            // Překreslit UI hned, aby byly vidět loadery
                             createUploadFields();
                             
                             filesToUpload.forEach(item => {
@@ -422,12 +423,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         function uploadImage(file, index) {
                             const formData = new FormData();
                             formData.append('file', file);
-                            
-                            // Okamžitá vizuální zpětná vazba
-                            setTimeout(() => {
-                                const preview = document.getElementById('preview-' + (index + 1));
-                                if (preview) preview.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#007bff;"><span class="tox-spinner"></span>&nbsp;Nahrávám...</div>';
-                            }, 0);
                             
                             activeUploads++;
                             updateSubmitButton();
@@ -448,10 +443,17 @@ document.addEventListener('DOMContentLoaded', function() {
                             })
                             .catch(error => {
                                 console.error(error);
+                                uploadedImages[index] = null; // Reset na prázdný slot při chybě
+                                createUploadFields();
+                                // Zobrazit chybu
                                 setTimeout(() => {
                                     const preview = document.getElementById('preview-' + (index + 1));
-                                    if (preview) preview.innerHTML = '<span style="color: red;">Chyba uploadu</span>';
-                                }, 0);
+                                    if (preview) {
+                                        preview.innerHTML = '<span style="color: red; font-size: 0.9em;">Chyba uploadu</span>';
+                                        // Po chvilce vrátit do stavu dropzone (což už je, protože jsme dali null, ale text tam zůstal)
+                                        // createUploadFields to vyřeší při příštím renderu, nebo to necháme takto
+                                    }
+                                }, 50);
                             })
                             .finally(() => {
                                 activeUploads--;
@@ -467,6 +469,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                 createSingleUploadField(index, imgUrl);
                             });
                             
+                            // Zobrazit tlačítko jen pokud není plno a poslední slot není loading/obsazený
+                            // (zjednodušeno: pokud je < 10, tlačítko tam je)
                             if (uploadedImages.length < 10) {
                                 const btnDiv = document.createElement('div');
                                 btnDiv.className = 'text-center mt-3';
@@ -499,7 +503,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             fileInput.accept = 'image/*';
                             fileInput.className = 'form-control';
                             fileInput.multiple = true; 
-                            fileInput.style.display = 'none'; // Skrýt standardní input, použijeme custom UI
+                            fileInput.style.display = 'none'; // Skrýt standardní input
                             
                             // Custom dropzone UI
                             const preview = document.createElement('div');
@@ -517,7 +521,16 @@ document.addEventListener('DOMContentLoaded', function() {
                             preview.style.background = '#f8f9fc';
                             preview.style.transition = 'all 0.2s';
                             
-                            if (imgUrl) {
+                            if (imgUrl === 'loading') {
+                                preview.style.border = '2px solid #007bff';
+                                preview.style.background = '#eef0ff';
+                                preview.innerHTML = `
+                                    <div style="text-align:center; color: #007bff;">
+                                        <div class="tox-spinner" style="margin: 0 auto 10px auto;"></div>
+                                        <div style="font-weight:bold;">Nahrávám...</div>
+                                    </div>
+                                `;
+                            } else if (imgUrl) {
                                 preview.style.border = '1px solid #ddd';
                                 preview.style.background = '#fff';
                                 const img = document.createElement('img');
@@ -529,20 +542,24 @@ document.addEventListener('DOMContentLoaded', function() {
                                 img.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
                                 
                                 const removeBtn = document.createElement('button');
-                                removeBtn.innerHTML = '×';
+                                removeBtn.innerHTML = '×'; // Křížek
                                 removeBtn.style.position = 'absolute';
-                                removeBtn.style.top = '-10px';
-                                removeBtn.style.right = '-10px';
-                                removeBtn.style.background = '#dc3545';
+                                removeBtn.style.top = '5px'; // Uvnitř boxu
+                                removeBtn.style.right = '5px'; // Uvnitř boxu
+                                removeBtn.style.background = 'rgba(220, 53, 69, 0.9)'; // Poloprůhledná červená
                                 removeBtn.style.color = 'white';
                                 removeBtn.style.border = 'none';
                                 removeBtn.style.borderRadius = '50%';
-                                removeBtn.style.width = '28px';
-                                removeBtn.style.height = '28px';
-                                removeBtn.style.fontSize = '18px';
-                                removeBtn.style.lineHeight = '1';
+                                removeBtn.style.width = '24px';
+                                removeBtn.style.height = '24px';
+                                removeBtn.style.fontSize = '20px'; // Větší font pro křížek
+                                removeBtn.style.display = 'flex';
+                                removeBtn.style.alignItems = 'center';
+                                removeBtn.style.justifyContent = 'center';
+                                removeBtn.style.paddingBottom = '2px'; // Optické vycentrování křížku
                                 removeBtn.style.cursor = 'pointer';
                                 removeBtn.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+                                removeBtn.style.zIndex = '10';
                                 removeBtn.title = 'Odstranit obrázek';
                                 removeBtn.onclick = (e) => { e.stopPropagation(); removeImage(index); };
                                 
