@@ -1,6 +1,6 @@
 # Manuál k editoru článků (TinyMCE)
 
-Tento editor byl upraven na míru pro maximální jednoduchost a "blbuvzdornost". Níže najdete popis speciálních funkcí a tlačítek.
+Tento editor byl upraven na míru pro maximální jednoduchost a "blbuvzdornost". Níže najdete popis všech funkcí a tlačítek.
 
 ## 1. Hlavní panel nástrojů (Toolbar)
 
@@ -10,13 +10,21 @@ Tlačítka jsou seřazena logicky zleva doprava:
 *   **Zpět / Vpřed (Undo/Redo):** Klasické šipky pro vrácení změn.
 *   **Obnovit koncept (Restore Draft):** Pokud vám spadne prohlížeč nebo omylem zavřete okno, editor si pamatuje rozepsaný text (ukládá se každých 30 sekund). Tímto tlačítkem ho obnovíte.
 
-### Formátování
-*   **Styly:** Výběr nadpisů (Nadpis 2, Nadpis 3) a odstavce. (Nadpis 1 se používá automaticky pro titulek článku, v textu ho nepoužívejte).
-*   **B, I, U:** Tučné, kurzíva, podtržené.
-*   **Zarovnání:** Vlevo, na střed, vpravo.
-*   **Seznamy:** Odrážky a číslovaný seznam.
+### Formátování textu
+*   **Styly:** Dropdown menu pro výběr formátu.
+    *   **Normální text:** Běžný odstavec.
+    *   **Nadpis 2 (H2):** Hlavní podnadpisy v článku.
+    *   **Nadpis 3 (H3):** Menší podnadpisy.
+    *   *Poznámka: Nadpis 1 se používá automaticky pro titulek článku, v textu ho nepoužívejte.*
+*   **B (Bold):** Tučné písmo.
+*   **I (Italic):** Kurzíva.
+*   **U (Underline):** Podtržené písmo.
+*   **Zarovnání:** Tlačítka pro zarovnání textu vlevo, na střed a vpravo.
+*   **Seznamy:**
+    *   **Odrážky:** Nečíslovaný seznam.
+    *   **Číslování:** Číslovaný seznam.
 
-### Vkládání obsahu (Vlastní funkce)
+### Vkládání obsahu (Speciální funkce)
 
 #### 🖼️ Vložit jeden obrázek (`simpleimage`)
 *   **Ikona:** Obrázek (hory).
@@ -38,7 +46,7 @@ Tlačítka jsou seřazena logicky zleva doprava:
 
 #### 💬 Vložit příspěvek ze sociálních sítí (`socialembed`)
 *   **Ikona:** Bublina s plusem.
-*   **Funkce:** Vloží interaktivní náhled příspěvku (Instagram, Facebook, Twitter, TikTok, YouTube...).
+*   **Funkce:** Vloží interaktivní náhled příspěvku (Instagram, Facebook, Twitter/X, TikTok, YouTube...).
 *   **Jak to funguje:**
     1.  Zkopírujte URL adresu příspěvku (např. `https://www.instagram.com/p/C...`).
     2.  Vložte ji do políčka.
@@ -55,12 +63,18 @@ Tlačítka jsou seřazena logicky zleva doprava:
 *   **Vlastnost:** Odkaz se **vždy** otevře v novém okně (čtenář neodejde z vašeho webu).
 *   **Klávesová zkratka:** `Ctrl + K`
 
-## 2. Další vychytávky
+#### 💻 Zdrojový kód (`code`)
+*   **Ikona:** Závorky `< >`.
+*   **Funkce:** Zobrazí HTML kód článku.
+*   **Použití:** Pouze pro pokročilé uživatele, pokud potřebujete opravit něco, co nejde v editoru.
 
-*   **Autosave:** Editor automaticky ukládá vaši práci do prohlížeče každých 30 sekund.
-*   **Čištění textu:** Pokud zkopírujete text z Wordu, editor ho automaticky "vyčistí" od bordelu a formátování, které by rozbilo web.
-*   **Pravopis:** Editor využívá kontrolu pravopisu vašeho prohlížeče. Chyby se podtrhávají červeně (ale neukládají se do textu, vidíte je jen vy).
-*   **Zákaz rozbíjení:** Nelze měnit velikost obrázků tažením myši (to často rozbíjelo vzhled na mobilech). Velikost se řeší automaticky.
+## 2. Automatické funkce a chování
+
+*   **Autosave (Automatické ukládání):** Editor automaticky ukládá vaši práci do prohlížeče každých 30 sekund. Koncept zůstává v paměti 20 minut. Pokud omylem zavřete okno, po návratu použijte tlačítko "Obnovit koncept".
+*   **Čištění textu (Paste Cleaning):** Pokud zkopírujete text z Wordu nebo jiného webu, editor ho automaticky "vyčistí" od zbytečného formátování, které by mohlo rozbít vzhled webu.
+*   **Kontrola pravopisu:** Editor využívá vestavěnou kontrolu pravopisu vašeho prohlížeče. Chyby se podtrhávají červeně.
+*   **Omezení nadpisů:** Pro zachování správné struktury webu jsou povoleny pouze nadpisy úrovně 2 a 3.
+*   **Zákaz změny velikosti (No Resize):** Obrázky a objekty nelze v editoru zvětšovat/zmenšovat myší. Velikost se na webu přizpůsobuje automaticky (responzivita), aby vše vypadalo dobře na mobilech i počítačích.
 
 ## 3. Klávesové zkratky (Shrnutí)
 
@@ -70,4 +84,7 @@ Tlačítka jsou seřazena logicky zleva doprava:
 | **Vložit obrázek** | `Ctrl + Shift + I` |
 | **Vložit galerii** | `Ctrl + Shift + G` |
 | **Vložit soc. příspěvek** | `Ctrl + Shift + E` |
-| **Uložit (běžné)** | `Ctrl + S` (v prohlížeči může vyvolat uložení stránky, spoléhejte na tlačítko Uložit pod editorem) |
+| **Uložit (běžné)** | `Ctrl + S` (Uloží článek) |
+| **Tučné** | `Ctrl + B` |
+| **Kurzíva** | `Ctrl + I` |
+| **Podtržené** | `Ctrl + U` |

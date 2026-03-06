@@ -300,6 +300,14 @@ class HomeController
         require '../app/Views/Web/layouts/base.php';
     }
 
+    public function manual()
+    {
+        // SEO nastavení - interní stránka, nechceme indexovat
+        // Pro čistou stránku nepotřebujeme base.php ani SEO proměnné
+        
+        require '../app/Views/Web/home/manual.php';
+    }
+
     public function obchodniPodminky()
     {
         $css = ['kontakt'];

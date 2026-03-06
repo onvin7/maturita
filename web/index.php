@@ -100,6 +100,7 @@ $routes = [
     '/events' => [HomeController::class, 'events'],
     '/events/(\d+)/([^/]+)' => [HomeController::class, 'eventDetail'],
     '/appka' => [HomeController::class, 'appka'],
+    '/navod' => [HomeController::class, 'manual'],
     '/obchodni-podminky' => [HomeController::class, 'obchodniPodminky'],
     '/ochrana-osobnich-udaju' => [HomeController::class, 'ochranaOsobnichUdaju'],
     '/podminky-ochrany-osobnich-udaju' => [HomeController::class, 'ochranaOsobnichUdaju'],
