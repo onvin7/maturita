@@ -116,6 +116,19 @@
     cursor: pointer;
 }
 
+/* Styly pro zdroj obrázku/galerie */
+.image-source, 
+.gallery-source {
+  font-size: 14px;
+  color: #999;
+  font-style: italic;
+  text-align: center;
+  margin-top: 5px;
+  margin-bottom: 20px;
+  display: block;
+  width: 100%;
+}
+
 /* Responsive chování - na mobilu pod sebou */
 @media screen and (max-width: 768px) {
     .mce-content-body .images-gallery-2,
@@ -148,4 +161,3 @@
         max-width: 80%;
     }
 }
-

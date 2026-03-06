@@ -43,6 +43,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 div[class*="images-gallery-"] img { width: 100% !important; height: 100% !important; object-fit: cover !important; min-height: 150px; display: block; border-radius: 0 !important; transition: opacity 0.3s ease; }
                 div[class*="images-gallery-"] img:hover { opacity: 0.6 !important; }
                 
+                /* Styly pro zdroj */
+                .image-source, .gallery-source {
+                    font-size: 14px;
+                    color: #999;
+                    font-style: italic;
+                    text-align: center;
+                    margin-top: 5px;
+                    margin-bottom: 20px;
+                    display: block;
+                    width: 100%;
+                }
+
                 /* 1 fotka (v galerii) */
                 div.images-gallery-1 { grid-template-columns: 1fr !important; }
                 div.images-gallery-1 img { height: auto !important; max-height: 400px; }
@@ -170,6 +182,12 @@ document.addEventListener('DOMContentLoaded', function() {
                                         label: 'Zobrazit popis pod obrázkem (jako titulek)'
                                     },
                                     {
+                                        type: 'input',
+                                        name: 'source',
+                                        label: 'Zdroj (autor/web)',
+                                        placeholder: 'Např. ČTK, Instagram @uzivatel'
+                                    },
+                                    {
                                         type: 'htmlpanel',
                                         html: `
                                             <div class="mb-3">
@@ -192,22 +210,27 @@ document.addEventListener('DOMContentLoaded', function() {
                                 const data = api.getData();
                                 const altText = data.alt || '';
                                 const showCaption = data.show_caption;
+                                const source = data.source || '';
                                 let content = '';
+                                
+                                const sourceHtml = source ? `<div class="image-source">Zdroj: ${source}</div>` : '';
 
                                 if (uploadedImageUrl) {
                                     if (showCaption && altText) {
-                                        content = `<figure class="image"><img src="${uploadedImageUrl}" alt="${altText}" class="img-fluid"><figcaption class="image-title">${altText}</figcaption></figure>`;
+                                        content = `<figure class="image"><img src="${uploadedImageUrl}" alt="${altText}" class="img-fluid"><figcaption class="image-title">${altText}</figcaption></figure>${sourceHtml}`;
                                         editor.insertContent(content);
                                         
                                         const selectedNode = editor.selection.getNode();
-                                        const figure = editor.dom.getParent(selectedNode, 'figure');
-                                        if (figure) {
+                                        // Pokud jsme vložili zdroj, musíme najít poslední element
+                                        const lastElement = sourceHtml ? editor.dom.getNext(selectedNode, 'div.image-source') : editor.dom.getParent(selectedNode, 'figure');
+                                        
+                                        if (lastElement) {
                                             const newP = editor.dom.create('p', {}, '<br>');
-                                            editor.dom.insertAfter(newP, figure);
+                                            editor.dom.insertAfter(newP, lastElement);
                                             editor.selection.setCursorLocation(newP, 0);
                                         }
                                     } else {
-                                        content = `<img src="${uploadedImageUrl}" alt="${altText}" class="img-fluid">`;
+                                        content = `<img src="${uploadedImageUrl}" alt="${altText}" class="img-fluid">${sourceHtml}`;
                                         editor.insertContent(content);
                                         editor.insertContent('<p>&nbsp;</p>');
                                     }
@@ -339,6 +362,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         let dialogApi = null;
                         let editingNode = null;
                         let initialAlt = '';
+                        let initialSource = '';
                         let uploadContainer = null;
 
                         const selectedNode = editor.selection.getNode();
@@ -356,6 +380,12 @@ document.addEventListener('DOMContentLoaded', function() {
                                 }
                             });
                             if (uploadedImages.length === 0) uploadedImages.push(null);
+                            
+                            // Zkusit najít zdroj (hned za galerií)
+                            const nextNode = existingGallery.nextElementSibling;
+                            if (nextNode && nextNode.classList.contains('image-source')) {
+                                initialSource = nextNode.textContent.replace('Zdroj: ', '').trim();
+                            }
                         }
 
                         function updateSubmitButton() {
@@ -621,10 +651,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                 type: 'panel',
                                 items: [
                                     { type: 'input', name: 'gallery_alt', label: 'Popis galerie', placeholder: 'Popis' },
+                                    { type: 'input', name: 'gallery_source', label: 'Zdroj (autor/web)', placeholder: 'Např. ČTK, Instagram @uzivatel' },
                                     { type: 'htmlpanel', html: '<div id="gallery-upload-status"></div><div id="gallery-upload-container" style="max-height: 400px; overflow-y: auto; padding: 5px;"></div>' }
                                 ]
                             },
-                            initialData: { gallery_alt: initialAlt },
+                            initialData: { gallery_alt: initialAlt, gallery_source: initialSource },
                             buttons: [
                                 { type: 'cancel', text: 'Zrušit' },
                                 { type: 'submit', name: 'submit-btn', text: editingNode ? 'Uložit' : 'Vložit', primary: true }
@@ -638,6 +669,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 
                                 const data = api.getData();
                                 const baseAlt = data.gallery_alt || '';
+                                const source = data.gallery_source || '';
                                 const className = 'images-gallery-' + Math.min(filledImages.length, 4);
                                 
                                 let html = '<div class="' + className + '">';
@@ -645,10 +677,22 @@ document.addEventListener('DOMContentLoaded', function() {
                                     const alt = baseAlt ? baseAlt + ' - ' + (idx+1) : '';
                                     html += `<img src="${url}" alt="${alt}" class="img-fluid">`;
                                 });
-                                html += '</div><p><br></p>';
+                                html += '</div>';
+                                
+                                if (source) {
+                                    html += `<div class="image-source">Zdroj: ${source}</div>`;
+                                }
+                                
+                                html += '<p><br></p>';
                                 
                                 if (editingNode) {
                                     editor.undoManager.transact(() => {
+                                        // Pokud existuje starý zdroj, odstranit ho
+                                        const nextNode = editingNode.nextElementSibling;
+                                        if (nextNode && nextNode.classList.contains('image-source')) {
+                                            editor.dom.remove(nextNode);
+                                        }
+                                        
                                         editor.dom.replace(editor.dom.createFragment(html), editingNode);
                                     });
                                 } else {

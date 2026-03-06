@@ -217,7 +217,7 @@ if ($step == 'all' || $step == '2') {
                     ':role' => $user['admin'], // admin -> role
                     ':name' => $user['name'],
                     ':surname' => $user['surname'],
-                    ':profil_foto' => null, // Zpracuje se v kroku 9
+                    ':profil_foto' => '', // Zpracuje se v kroku 9 (sloupec je NOT NULL)
                     ':popis' => $user['popis'],
                     ':datum' => $user['datum']
                 ]);
@@ -1124,6 +1124,26 @@ if ($step == 'all' || $step == '9') {
             $users = array_slice($users, 0, $batch_limit);
             zprava("⚠️ Zpracováno bude jen prvních " . $batch_limit . " uživatelů (kvůli limitu).");
         }
+
+        // Cesty k profilovým fotkám - zkusit více možností
+        $old_photo_paths = [
+            '/data/web/virtuals/340619/virtual/www/subdom/magazin/assets/img/upload/profil_foto/', // Absolutní cesta
+            'https://www.magazin.cyklistickey.cz/assets/img/upload/profil_foto/' // HTTP URL
+        ];
+        $new_photo_path = $_SERVER['DOCUMENT_ROOT'] . '/web/uploads/users/thumbnails/';
+        
+        zprava("📁 Nová cesta: $new_photo_path");
+        
+        // Zajistit, že nová složka existuje
+        if (!is_dir($new_photo_path)) {
+            if (mkdir($new_photo_path, 0777, true)) {
+                zprava("✓ Vytvořena nová složka: $new_photo_path");
+            } else {
+                zprava("❌ Nepodařilo se vytvořit složku: $new_photo_path");
+            }
+        } else {
+            zprava("✓ Nová složka existuje: $new_photo_path");
+        }
         
         $stmt_new = $pdo_new->prepare("
             UPDATE users 
@@ -1133,6 +1153,8 @@ if ($step == 'all' || $step == '9') {
         
         $updated = 0;
         $skipped = 0;
+        $downloaded = 0;
+        $missing_files = 0;
         
         foreach ($users as $user) {
             try {
@@ -1148,26 +1170,79 @@ if ($step == 'all' || $step == '9') {
                     $stmt_check = $pdo_new->prepare("SELECT id FROM users WHERE id = :id");
                     $stmt_check->execute([':id' => $user['id']]);
                     if ($stmt_check->fetch()) {
-                        $stmt_new->execute([
-                            ':id' => $user['id'],
-                            ':profil_foto' => $profil_foto
-                        ]);
-                        $updated++;
+                        
+                        // Stáhnout/zkopírovat soubor
+                        $new_file = $new_photo_path . $profil_foto;
+                        $file_copied = false;
+                        
+                        // Pokud soubor už existuje, nepřepisovat (nebo volitelně přepsat?)
+                        if (file_exists($new_file) && filesize($new_file) > 0) {
+                            $file_copied = true;
+                            // zprava("  ✓ Soubor už existuje: $profil_foto");
+                        } else {
+                            foreach ($old_photo_paths as $old_path) {
+                                $old_file = $old_path . $profil_foto;
+                                
+                                if (strpos($old_file, 'http') === 0) {
+                                    // HTTP URL - stáhnout přes HTTP
+                                    $context = stream_context_create([
+                                        'http' => [
+                                            'timeout' => 10,
+                                            'user_agent' => 'Mozilla/5.0',
+                                            'ignore_errors' => true
+                                        ]
+                                    ]);
+                                    
+                                    $file_content = @file_get_contents($old_file, false, $context);
+                                    if ($file_content !== false && strlen($file_content) > 0) {
+                                        if (@file_put_contents($new_file, $file_content)) {
+                                            $file_copied = true;
+                                            $downloaded++;
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    // Lokální soubor
+                                    try {
+                                        if (@file_exists($old_file)) {
+                                            if (@copy($old_file, $new_file)) {
+                                                $file_copied = true;
+                                                $downloaded++;
+                                                break;
+                                            }
+                                        }
+                                    } catch (Exception $e) {
+                                        continue;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        if ($file_copied) {
+                            $stmt_new->execute([
+                                ':id' => $user['id'],
+                                ':profil_foto' => $profil_foto
+                            ]);
+                            $updated++;
+                        } else {
+                            $missing_files++;
+                            zprava("  ⚠️ Soubor nenalezen: $profil_foto (User ID: {$user['id']})");
+                        }
                     } else {
                         $skipped++;
                     }
                 }
                 
                 // Progress každých 50 záznamů
-                if (($updated + $skipped) % 50 == 0) {
-                    zprava("  Zpracováno " . ($updated + $skipped) . " obrázků...");
+                if (($updated + $skipped + $missing_files) % 50 == 0) {
+                    zprava("  Zpracováno " . ($updated + $skipped + $missing_files) . " záznamů...");
                 }
             } catch (PDOException $e) {
                 zprava("⚠️ Chyba u uživatele ID {$user['id']}: " . $e->getMessage());
             }
         }
         
-        zprava("✓ Obrázky uživatelů: $updated aktualizovaných, $skipped přeskočeno (uživatel neexistuje).");
+        zprava("✓ Obrázky uživatelů: $updated aktualizovaných (z toho $downloaded stažených), $missing_files nenalezeno, $skipped přeskočeno (uživatel neexistuje).");
         
         // Zobrazit informaci o pokračování
         if (count($users) > 0) {

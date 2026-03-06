@@ -152,7 +152,7 @@
         </div>
 
         <p style="text-align: center; margin-top: 50px; color: #888;">
-            Vytvořeno pro tým Cyklistickey.cz &copy; 2024
+            Vytvořeno pro tým Cyklistickey.cz &copy; 2026
         </p>
     </div>
 </body>
