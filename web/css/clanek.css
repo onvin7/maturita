@@ -147,9 +147,9 @@ body {
   font-size: 14px;
   color: grey;
   text-align: center;
-  font-weight: 300;
+  font-weight: 500;
   font-style: italic;
-  margin-top: -10px;
+  margin-top: 0;
   margin-bottom: 15px;
 }
 
@@ -378,13 +378,15 @@ body {
 
 .categories .output {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px;
   margin-bottom: 20px;
 }
 
 .categories .output .kategorie {
   display: flex;
-  margin-bottom: 5px;
+  margin-bottom: 0;
 }
 
 .categories .output .kategorie a#kategorie,
@@ -773,13 +775,7 @@ span[data-pin-log="embed"] > span {
   text-align: center;
 }
 
-.image-title {
-  text-align: center;
-  margin-top: 15px;
-  font-style: italic;
-  color: grey;
-  font-size: 15px;
-}
+
 
 .container-zobrazit .text .text-editor img {
   width: 80%;

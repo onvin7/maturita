@@ -1,230 +1,163 @@
 document.addEventListener('DOMContentLoaded', function() {
-    initGalleries();
-    initStandaloneImages();
-    initLightbox();
-});
-
-let currentGalleryImages = [];
-let currentImageIndex = 0;
-
-function initGalleries() {
-    // Hledáme všechny divy, které obsahují třídu začínající na "images-gallery-"
-    // To jsou ty, které generuje TinyMCE (např. images-gallery-4)
+    // 1. Najdeme všechny galerie (divy s třídou images-gallery-X)
     const galleries = document.querySelectorAll('div[class*="images-gallery-"]');
     
+    if (galleries.length === 0) return;
+
+    // 2. Vytvoříme Lightbox HTML strukturu, pokud neexistuje
+    if (!document.getElementById('lightbox')) {
+        const lightboxHtml = `
+            <div id="lightbox">
+                <button id="lightbox-close">&times;</button>
+                <div id="lightbox-content">
+                    <button id="lightbox-prev" class="lightbox-btn">&#10094;</button>
+                    <img id="lightbox-img" src="" alt="Zvětšený obrázek">
+                    <button id="lightbox-next" class="lightbox-btn">&#10095;</button>
+                </div>
+                <div id="lightbox-counter"></div>
+                <div id="lightbox-thumbnails"></div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', lightboxHtml);
+    }
+
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const prevBtn = document.getElementById('lightbox-prev');
+    const nextBtn = document.getElementById('lightbox-next');
+    const closeBtn = document.getElementById('lightbox-close');
+    const counter = document.getElementById('lightbox-counter');
+    const thumbnailsContainer = document.getElementById('lightbox-thumbnails');
+
+    let currentGalleryImages = []; // Pole URL obrázků v aktuální galerii
+    let currentIndex = 0;
+
+    // 3. Inicializace galerií
     galleries.forEach(gallery => {
-        // Přidáme naši univerzální třídu pro grid
+        // Přidáme třídu gallery-grid pro CSS stylování
         gallery.classList.add('gallery-grid');
         
         const images = Array.from(gallery.querySelectorAll('img'));
-        const imageCount = images.length;
+        const count = images.length;
+        gallery.setAttribute('data-count', count);
         
-        // Set data attribute for CSS specific layouts
-        gallery.setAttribute('data-count', imageCount);
-        
-        // Configuration
-        const maxVisible = 4;
-        
-        // If we have more images than we want to show
-        if (imageCount > maxVisible) {
-            // Hide images beyond the limit
-            for (let i = maxVisible; i < imageCount; i++) {
-                images[i].style.display = 'none';
-            }
-            
-            // Add overlay to the last visible image
-            const lastVisibleIndex = maxVisible - 1;
-            const lastVisibleImage = images[lastVisibleIndex];
-            const remainingCount = imageCount - maxVisible;
-            
-            // Wrap the last visible image to position overlay
+        // Wrapper pro každý obrázek (pro lepší stylování a overlay)
+        images.forEach((img, index) => {
             const wrapper = document.createElement('div');
             wrapper.className = 'gallery-item-wrapper';
+            img.parentNode.insertBefore(wrapper, img);
+            wrapper.appendChild(img);
             
-            // Insert wrapper before image
-            lastVisibleImage.parentNode.insertBefore(wrapper, lastVisibleImage);
-            
-            // Move image into wrapper
-            wrapper.appendChild(lastVisibleImage);
-            
-            // Create overlay
-            const overlay = document.createElement('div');
-            overlay.className = 'gallery-overlay';
-            // Logic: if we have 10 images, max 4 visible.
-            // 4th image (index 3) is visible.
-            // Hidden: index 4,5,6,7,8,9 (6 images).
-            // Overlay says "+6" (meaning 6 MORE images).
-            // Or "+7" (meaning 7 images including this one)?
-            // Usually "+6" is preferred ("and 6 others").
-            overlay.innerHTML = `<span>+${remainingCount}</span>`;
-            
-            wrapper.appendChild(overlay);
-            
-            // Add click listener to overlay
-            overlay.addEventListener('click', (e) => {
-                e.stopPropagation();
-                openLightbox(images, lastVisibleIndex);
-            });
-        }
-        
-        // Add click listeners to all visible images (including the wrapped one via bubbling or direct)
-        images.forEach((img, index) => {
-            img.addEventListener('click', () => {
+            // Kliknutí na obrázek otevře lightbox
+            img.addEventListener('click', function(e) {
+                e.preventDefault();
                 openLightbox(images, index);
             });
-        });
-    });
-}
 
-function initStandaloneImages() {
-    // Select images inside .text-editor that are NOT inside .gallery-container
-    // Note: We use .text-editor class which wraps the content in article.php
-    const contentImages = document.querySelectorAll('.text-editor img');
-    
-    contentImages.forEach(img => {
-        // Check if parent is not gallery-container (or wrapper inside gallery-container)
-        // Používáme closest pro kontrolu, zda je v galerii, a používáme stejný selector jako v initGalleries
-        if (!img.closest('div[class*="images-gallery-"]')) {
-            // Check if it's not a functional image or inside a link
-            if (img.closest('a')) return;
-
-            img.style.cursor = 'pointer';
-            img.addEventListener('click', () => {
-                // Open lightbox with just this single image
-                openLightbox([img], 0);
-            });
-        }
-    });
-}
-
-function initLightbox() {
-    const closeBtn = document.getElementById('lightbox-close');
-    const prevBtn = document.getElementById('lightbox-prev');
-    const nextBtn = document.getElementById('lightbox-next');
-    const lightbox = document.getElementById('lightbox');
-    
-    if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
-    if (prevBtn) prevBtn.addEventListener('click', showPrevImage);
-    if (nextBtn) nextBtn.addEventListener('click', showNextImage);
-    
-    // Close on background click
-    if (lightbox) {
-        lightbox.addEventListener('click', (e) => {
-            if (e.target === lightbox || e.target.id === 'lightbox-content') {
-                closeLightbox();
-            }
-        });
-    }
-    
-    // Keyboard navigation
-    document.addEventListener('keydown', (e) => {
-        if (!document.getElementById('lightbox') || document.getElementById('lightbox').style.display === 'none') return;
-        
-        if (e.key === 'Escape') closeLightbox();
-        if (e.key === 'ArrowLeft') showPrevImage();
-        if (e.key === 'ArrowRight') showNextImage();
-    });
-}
-
-function openLightbox(images, startIndex) {
-    currentGalleryImages = images;
-    currentImageIndex = startIndex;
-    
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImg = document.getElementById('lightbox-img');
-    const thumbnailsContainer = document.getElementById('lightbox-thumbnails');
-    
-    if (!lightbox || !lightboxImg) return;
-    
-    // Show lightbox
-    lightbox.style.display = 'flex';
-    lightbox.classList.add('active');
-    
-    // Setup thumbnails
-    if (thumbnailsContainer) {
-        thumbnailsContainer.innerHTML = '';
-        
-        // Only show thumbnails if multiple images
-        if (images.length > 1) {
-            images.forEach((img, index) => {
-                const thumb = document.createElement('img');
-                thumb.src = img.src;
-                thumb.className = 'lightbox-thumb';
-                if (index === startIndex) thumb.classList.add('active');
+            // Pokud je to 5. obrázek a je jich víc než 5, přidáme overlay "+X"
+            if (count > 5 && index === 4) {
+                const remaining = count - 5;
+                const overlay = document.createElement('div');
+                overlay.className = 'gallery-overlay';
+                overlay.textContent = '+' + (remaining + 1); // +1 protože počítáme i tento pátý
                 
-                thumb.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    showImage(index);
+                overlay.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation(); // Aby se nespustil click na img pod tím dvakrát
+                    openLightbox(images, index);
                 });
                 
-                thumbnailsContainer.appendChild(thumb);
-            });
-            thumbnailsContainer.style.display = 'flex';
-        } else {
-            thumbnailsContainer.style.display = 'none';
-        }
-    }
-    
-    // Single image mode check
-    if (images.length === 1) {
-        lightbox.classList.add('single');
-    } else {
-        lightbox.classList.remove('single');
-    }
-    
-    showImage(startIndex);
-}
+                wrapper.appendChild(overlay);
+            }
+            
+            // Skryjeme obrázky nad 5 (CSS grid to řeší, ale pro jistotu nebo jiné layouty)
+            // V našem CSS gridu (data-count="5") jsou definované řádky, co se nevejde, je skryto overflow:hidden gridu
+            // Ale my chceme, aby 6. a další byly v HTML přítomné pro lightbox, ale neviditelné v gridu.
+            // Grid layout s pevnými řádky to zařídí automaticky (budou "pod" viditelnou částí).
+        });
+    });
 
-function closeLightbox() {
-    const lightbox = document.getElementById('lightbox');
-    if (lightbox) {
-        lightbox.style.display = 'none';
+    // 4. Funkce Lightboxu
+    function openLightbox(imagesElements, index) {
+        currentGalleryImages = imagesElements.map(img => img.src);
+        currentIndex = index;
+        
+        updateLightboxContent();
+        lightbox.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Zamezit scrollování stránky
+        
+        // Klávesnice
+        document.addEventListener('keydown', handleKeydown);
+    }
+
+    function closeLightbox() {
         lightbox.classList.remove('active');
+        document.body.style.overflow = '';
+        document.removeEventListener('keydown', handleKeydown);
     }
-}
 
-function showImage(index) {
-    if (index < 0) index = currentGalleryImages.length - 1;
-    if (index >= currentGalleryImages.length) index = 0;
-    
-    currentImageIndex = index;
-    
-    const img = currentGalleryImages[index];
-    const lightboxImg = document.getElementById('lightbox-img');
-    const counter = document.getElementById('lightbox-counter');
-    
-    // Update main image
-    lightboxImg.src = img.src;
-    lightboxImg.alt = img.alt || '';
-    
-    // Update counter
-    if (counter) {
+    function updateLightboxContent() {
+        lightboxImg.src = currentGalleryImages[currentIndex];
+        counter.textContent = (currentIndex + 1) + ' / ' + currentGalleryImages.length;
+        
+        // Šipky
         if (currentGalleryImages.length > 1) {
-            counter.textContent = `${index + 1} / ${currentGalleryImages.length}`;
-            counter.style.display = 'block';
+            prevBtn.style.display = 'flex';
+            nextBtn.style.display = 'flex';
         } else {
-            counter.style.display = 'none';
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
+            lightbox.classList.add('single');
         }
+        
+        // Náhledy
+        renderThumbnails();
     }
-    
-    // Update thumbnails
-    const thumbnails = document.querySelectorAll('.lightbox-thumb');
-    thumbnails.forEach((thumb, i) => {
-        if (i === index) {
-            thumb.classList.add('active');
-            thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-        } else {
-            thumb.classList.remove('active');
+
+    function showNext() {
+        currentIndex = (currentIndex + 1) % currentGalleryImages.length;
+        updateLightboxContent();
+    }
+
+    function showPrev() {
+        currentIndex = (currentIndex - 1 + currentGalleryImages.length) % currentGalleryImages.length;
+        updateLightboxContent();
+    }
+
+    function renderThumbnails() {
+        thumbnailsContainer.innerHTML = '';
+        if (currentGalleryImages.length <= 1) return;
+
+        currentGalleryImages.forEach((src, idx) => {
+            const thumb = document.createElement('img');
+            thumb.src = src;
+            thumb.className = 'lightbox-thumb';
+            if (idx === currentIndex) thumb.classList.add('active');
+            
+            thumb.addEventListener('click', function() {
+                currentIndex = idx;
+                updateLightboxContent();
+            });
+            
+            thumbnailsContainer.appendChild(thumb);
+        });
+    }
+
+    function handleKeydown(e) {
+        if (e.key === 'Escape') closeLightbox();
+        if (e.key === 'ArrowRight') showNext();
+        if (e.key === 'ArrowLeft') showPrev();
+    }
+
+    // Event listenery ovládání
+    closeBtn.addEventListener('click', closeLightbox);
+    nextBtn.addEventListener('click', showNext);
+    prevBtn.addEventListener('click', showPrev);
+
+    // Kliknutí mimo obrázek zavře lightbox
+    lightbox.addEventListener('click', function(e) {
+        if (e.target === lightbox || e.target.id === 'lightbox-content') {
+            closeLightbox();
         }
     });
-}
-
-function showPrevImage(e) {
-    if (e) e.stopPropagation();
-    showImage(currentImageIndex - 1);
-}
-
-function showNextImage(e) {
-    if (e) e.stopPropagation();
-    showImage(currentImageIndex + 1);
-}
+});

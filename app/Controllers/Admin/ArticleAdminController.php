@@ -52,11 +52,11 @@ class ArticleAdminController
     public function store($postData)
     {
         if (empty($postData['nazev'])) {
-            echo "Název článku je povinný.";
+            // echo "Název článku je povinný.";
             return;
         }
         if (empty($postData['content'])) {
-            echo "Obsah článku je povinný.";
+            // echo "Obsah článku je povinný.";
             return;
         }
 
@@ -70,7 +70,7 @@ class ArticleAdminController
             $fileType = $_FILES['nahled_foto']['type'];
             
             if (!in_array($fileType, $allowedTypes)) {
-                echo "<div class='alert alert-danger'>Chyba: Nepodporovaný formát souboru. Povolené formáty jsou JPEG, PNG a GIF.</div>";
+                // echo "<div class='alert alert-danger'>Chyba: Nepodporovaný formát souboru. Povolené formáty jsou JPEG, PNG a GIF.</div>";
                 return;
             }
             
@@ -99,10 +99,10 @@ class ArticleAdminController
                 $this->createThumbnail($largeFilePath, $smallFilePath, 600, 400, 85, false);
 
                 $nahledFoto = $uniqueName;
-                echo "<p>Fotka byla úspěšně nahrána:</p>";
-                echo "<img src='/uploads/thumbnails/male/$nahledFoto' alt='Náhled' style='max-width: 150px;'>";
+                // Fotka úspěšně nahrána
             } else {
-                echo "❌ Chyba při nahrávání souboru!";
+                // echo "❌ Chyba při nahrávání souboru!";
+                return;
             }
         }
 
@@ -121,7 +121,7 @@ class ArticleAdminController
             $audioFileType = $_FILES['audio_file']['type'];
             
             if (!in_array($audioFileType, $allowedAudioTypes)) {
-                echo "<div class='alert alert-danger'>Chyba: Nepodporovaný formát zvukového souboru. Povolený formát je MP3.</div>";
+                // echo "<div class='alert alert-danger'>Chyba: Nepodporovaný formát zvukového souboru. Povolený formát je MP3.</div>";
                 return;
             }
             
@@ -132,9 +132,9 @@ class ArticleAdminController
             if (move_uploaded_file($_FILES['audio_file']['tmp_name'], $tempAudioPath)) {
                 @LogHelper::admin('Article audio uploaded', 'File: ' . $tempAudioPath . ', Size: ' . $_FILES['audio_file']['size'] . ' bytes');
                 $audioFile = $tempAudioName;
-                echo "<p>Zvukový soubor byl úspěšně nahrán.</p>";
             } else {
-                echo "<div class='alert alert-danger'>❌ Chyba při nahrávání zvukového souboru!</div>";
+                // echo "<div class='alert alert-danger'>❌ Chyba při nahrávání zvukového souboru!</div>";
+                return;
             }
         }
 
@@ -189,7 +189,7 @@ class ArticleAdminController
             exit;
         } else {
             LogHelper::admin('Article create failed', 'Title: ' . ($postData['nazev'] ?? 'N/A'));
-            echo "Chyba při ukládání článku.";
+            // echo "Chyba při ukládání článku.";
         }
     }
 
@@ -197,7 +197,7 @@ class ArticleAdminController
     {
         $article = $this->articleModel->getById($id); // Načtení článku podle ID
         if (!$article) {
-            echo "Článek nenalezen.";
+            // echo "Článek nenalezen.";
             return;
         }
 
@@ -217,11 +217,11 @@ class ArticleAdminController
     public function update($id, $postData)
     {
         if (empty($postData['nazev'])) {
-            echo "Název článku je povinný.";
+            // echo "Název článku je povinný.";
             return;
         }
         if (empty($postData['content'])) {
-            echo "Obsah článku je povinný.";
+            // echo "Obsah článku je povinný.";
             return;
         }
 
@@ -239,7 +239,7 @@ class ArticleAdminController
             $fileType = $_FILES['nahled_foto']['type'];
             
             if (!in_array($fileType, $allowedTypes)) {
-                echo "<div class='alert alert-danger'>Chyba: Nepodporovaný formát souboru. Povolené formáty jsou JPEG, PNG a GIF.</div>";
+                // echo "<div class='alert alert-danger'>Chyba: Nepodporovaný formát souboru. Povolené formáty jsou JPEG, PNG a GIF.</div>";
                 return;
             }
             
@@ -267,7 +267,6 @@ class ArticleAdminController
                 $this->createThumbnail($largeFilePath, $smallFilePath, 600, 400, 85, false);
 
                 $nahledFoto = $noveFoto;
-                echo "<p>Nová fotka byla úspěšně nahrána</p>";
             }
         }
 
@@ -285,7 +284,7 @@ class ArticleAdminController
             $audioFileType = $_FILES['audio_file']['type'];
             
             if (!in_array($audioFileType, $allowedAudioTypes)) {
-                echo "<div class='alert alert-danger'>Chyba: Nepodporovaný formát zvukového souboru. Povolený formát je MP3.</div>";
+                // echo "<div class='alert alert-danger'>Chyba: Nepodporovaný formát zvukového souboru. Povolený formát je MP3.</div>";
                 return;
             }
             
@@ -297,10 +296,9 @@ class ArticleAdminController
                 // Uložit cestu k audio souboru do databáze
                 $audioDbPath = '/uploads/audio/' . $id . '.mp3';
                 $this->articleModel->saveArticleAudio($id, $audioDbPath);
-                
-                echo "<p>Zvukový soubor byl úspěšně aktualizován.</p>";
             } else {
-                echo "<div class='alert alert-danger'>❌ Chyba při nahrávání zvukového souboru!</div>";
+                // echo "<div class='alert alert-danger'>❌ Chyba při nahrávání zvukového souboru!</div>";
+                return;
             }
         }
 
@@ -372,7 +370,7 @@ class ArticleAdminController
             exit;
         } else {
             LogHelper::admin('Article update failed', 'ID: ' . $id);
-            echo "Chyba při aktualizaci článku.";
+            // echo "Chyba při aktualizaci článku.";
         }
     }
 
@@ -416,7 +414,7 @@ class ArticleAdminController
         $article = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if (!$article) {
-            echo "Článek nenalezen.";
+            // echo "Článek nenalezen.";
             return;
         }
 

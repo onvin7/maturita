@@ -23,12 +23,37 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // CSS styly přímo pro editor (aby galerie vypadala hezky už tady)
             content_style: `
-                body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; line-height: 1.6; color: #333; }
+                @import url('https://fonts.googleapis.com/css2?family=Fira+Sans+Condensed:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+                body { font-family: 'Fira Sans Condensed', sans-serif; line-height: 1.6; color: #333; margin: 1rem; }
+                
+                h1, h2, h3, h4, h5, h6 {
+                    font-weight: 300;
+                    color: #f1008d;
+                    text-transform: uppercase;
+                }
+
                 img { max-width: 100%; height: auto; }
+                .img-fluid { max-width: 100%; height: auto; }
                 figure.image { margin: 1em 0; display: table; }
-                figure.image figcaption { text-align: center; color: #666; font-size: 0.9em; margin-top: 0.5em; display: table-caption; caption-side: bottom; }
-                div[class*="images-gallery-"] { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 1em 0; }
-                div[class*="images-gallery-"] img { width: 100%; height: 150px; object-fit: cover; border-radius: 4px; }
+                figure.image figcaption { text-align: center; color: #666; font-size: 0.9em; margin-top: 0.5em; display: table-caption; caption-side: bottom; font-weight: 500; font-style: italic; }
+                
+                /* Facebook-style gallery grid in editor (Minimalist) */
+                div[class*="images-gallery-"] { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 4px !important; margin: 1em 0 !important; width: 100% !important; border-radius: 0 !important; overflow: visible !important; background-color: #171925 !important; }
+                div[class*="images-gallery-"] img { width: 100% !important; height: 100% !important; object-fit: cover !important; min-height: 150px; display: block; border-radius: 0 !important; transition: opacity 0.3s ease; }
+                div[class*="images-gallery-"] img:hover { opacity: 0.6 !important; }
+                
+                /* 1 fotka (v galerii) */
+                div.images-gallery-1 { grid-template-columns: 1fr !important; }
+                div.images-gallery-1 img { height: auto !important; max-height: 400px; }
+                
+                /* 3 fotky */
+                div.images-gallery-3 { grid-template-columns: 1fr 1fr !important; grid-template-rows: 300px 200px !important; }
+                div.images-gallery-3 img:nth-child(1) { grid-column: 1 / -1 !important; }
+                
+                /* 4+ fotky */
+                div.images-gallery-4 { grid-template-columns: 1fr 1fr 1fr !important; grid-template-rows: 300px 150px !important; }
+                div.images-gallery-4 img:nth-child(1) { grid-column: 1 / -1 !important; }
             `,
             
             // 2. Nastavení Autosave (záchrana práce)
@@ -80,133 +105,145 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Vlastní nastavení editoru
             setup: function(editor) {
-                // --- VLASTNÍ TLAČÍTKO PRO JEDNODUCHÉ VLOŽENÍ OBRÁZKU ---
+                // --- VLASTNÍ TLAČÍTKO PRO JEDNODUCHÉ VLOŽENÍ OBRÁZKU (VYLEPŠENÉ) ---
                 editor.ui.registry.addButton('simpleimage', {
                     icon: 'image',
-                    tooltip: 'Vložit jeden obrázek',
+                    tooltip: 'Vložit obrázek',
                     onAction: function() {
-                        // Proměnné pro uložení stavu
-                        let selectedFile = null;
+                        let uploadedImageUrl = '';
+                        let dialogApi = null;
+                        
+                        function updateSubmitButton(enable) {
+                            if (dialogApi) {
+                                dialogApi.setEnabled('submit-btn', enable);
+                                const statusEl = document.getElementById('upload-status');
+                                if (statusEl) {
+                                    statusEl.innerHTML = enable 
+                                        ? '<div style="color: #28a745;">✅ Obrázek nahrán. Můžete vložit.</div>' 
+                                        : '<div style="color: #007bff; font-weight: bold;">⏳ Nahrávám...</div>';
+                                }
+                            }
+                        }
 
-                        const dialog = editor.windowManager.open({
+                        function uploadImage(file) {
+                            const formData = new FormData();
+                            formData.append('file', file);
+                            
+                            const preview = document.getElementById('image-preview');
+                            preview.innerHTML = '<span style="color: #666;">Nahrávám...</span>';
+                            updateSubmitButton(false);
+                            
+                            fetch('/admin/upload-image', {
+                                method: 'POST',
+                                body: formData
+                            })
+                            .then(response => response.json())
+                            .then(result => {
+                                if (result && result.location) {
+                                    uploadedImageUrl = result.location;
+                                    preview.innerHTML = '<img src="' + result.location + '" style="max-width: 100%; max-height: 200px; border-radius: 4px; object-fit: contain;">';
+                                    updateSubmitButton(true);
+                                } else {
+                                    throw new Error('Chybí location');
+                                }
+                            })
+                            .catch(error => {
+                                preview.innerHTML = '<span style="color: red;">Chyba: ' + error.message + '</span>';
+                                updateSubmitButton(false);
+                            });
+                        }
+
+                        dialogApi = editor.windowManager.open({
                             title: 'Vložit obrázek',
                             body: {
                                 type: 'panel',
                                 items: [
                                     {
-                                        type: 'htmlpanel',
-                                        html: `
-                                            <div style="margin-bottom: 15px;">
-                                                <label class="tox-label" style="display: block; margin-bottom: 5px;">Vyberte obrázek z počítače</label>
-                                                <div style="display: flex; align-items: center; gap: 10px;">
-                                                    <label for="simple-image-upload" class="tox-button tox-button--secondary" style="cursor: pointer; display: inline-block;">
-                                                        Vybrat soubor
-                                                    </label>
-                                                    <span id="file-name-display" style="color: #666; font-size: 0.9em; font-style: italic;">Žádný soubor nevybrán</span>
-                                                </div>
-                                                <input type="file" id="simple-image-upload" accept="image/*" style="display: none;">
-                                                <div id="image-preview-container" style="margin-top: 10px; max-height: 200px; overflow: hidden; text-align: center; display: none;">
-                                                    <img id="image-preview" src="" style="max-width: 100%; max-height: 200px; border-radius: 4px; border: 1px solid #ddd;">
-                                                </div>
-                                            </div>
-                                        `
-                                    },
-                                    {
                                         type: 'input',
                                         name: 'alt',
-                                        label: 'Popis obrázku (ALT) - důležité pro vyhledávače',
-                                        placeholder: 'Např. Pohled na Sněžku'
+                                        label: 'Popis obrázku (Alt text)',
+                                        placeholder: 'Popis obrázku pro vyhledávače'
                                     },
                                     {
                                         type: 'checkbox',
-                                        name: 'caption',
-                                        label: 'Zobrazit tento popis i pod obrázkem (jako titulek)'
+                                        name: 'show_caption',
+                                        label: 'Zobrazit popis pod obrázkem (jako titulek)'
+                                    },
+                                    {
+                                        type: 'htmlpanel',
+                                        html: `
+                                            <div class="mb-3">
+                                                <label class="form-label">Vyberte obrázek</label>
+                                                <input type="file" class="form-control" accept="image/*" id="single-image-input">
+                                                <div id="image-preview" style="margin-top: 10px; min-height: 100px; border: 2px dashed #ccc; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #f8f9fc; cursor: pointer;">
+                                                    <span style="color: #aaa;">Klikněte nebo přetáhněte obrázek sem</span>
+                                                </div>
+                                                <div id="upload-status" style="margin-top: 5px; min-height: 24px;"></div>
+                                            </div>
+                                        `
                                     }
                                 ]
                             },
                             buttons: [
-                                {
-                                    type: 'cancel',
-                                    text: 'Zrušit'
-                                },
-                                {
-                                    type: 'submit',
-                                    text: 'Vložit obrázek',
-                                    primary: true
-                                }
+                                { type: 'cancel', text: 'Zrušit' },
+                                { type: 'submit', name: 'submit-btn', text: 'Vložit', primary: true, disabled: true }
                             ],
                             onSubmit: function(api) {
-                                if (!selectedFile) {
-                                    editor.windowManager.alert('Prosím vyberte obrázek.');
-                                    return;
-                                }
-
                                 const data = api.getData();
-                                const altText = data.alt ? data.alt.trim() : '';
-                                const showCaption = data.caption;
+                                const altText = data.alt || '';
+                                const showCaption = data.show_caption;
+                                let content = '';
 
-                                // Zobrazit loading stav (zablokovat dialog)
-                                api.block('Nahrávám obrázek...');
-
-                                const formData = new FormData();
-                                formData.append('file', selectedFile);
-
-                                fetch('/admin/upload-image', {
-                                    method: 'POST',
-                                    body: formData
-                                })
-                                .then(response => response.json())
-                                .then(result => {
-                                    if (result && result.location) {
-                                        let content = '';
-                                        
-                                        if (showCaption && altText) {
-                                            // Vložení s popiskem (HTML5 figure)
-                                            content = `<figure class="image"><img src="${result.location}" alt="${altText}"><figcaption>${altText}</figcaption></figure>`;
-                                        } else {
-                                            // Jen obrázek
-                                            content = `<img src="${result.location}" alt="${altText}">`;
-                                        }
-
+                                if (uploadedImageUrl) {
+                                    if (showCaption && altText) {
+                                        content = `<figure class="image"><img src="${uploadedImageUrl}" alt="${altText}" class="img-fluid"><figcaption class="image-title">${altText}</figcaption></figure>`;
                                         editor.insertContent(content);
                                         
-                                        // Nový řádek za obrázkem, aby se dalo psát dál
-                                        editor.insertContent('<p>&nbsp;</p>');
-                                        
-                                        api.close();
+                                        const selectedNode = editor.selection.getNode();
+                                        const figure = editor.dom.getParent(selectedNode, 'figure');
+                                        if (figure) {
+                                            const newP = editor.dom.create('p', {}, '<br>');
+                                            editor.dom.insertAfter(newP, figure);
+                                            editor.selection.setCursorLocation(newP, 0);
+                                        }
                                     } else {
-                                        api.unblock();
-                                        editor.windowManager.alert('Chyba: Server nevrátil cestu k obrázku.');
+                                        content = `<img src="${uploadedImageUrl}" alt="${altText}" class="img-fluid">`;
+                                        editor.insertContent(content);
+                                        editor.insertContent('<p>&nbsp;</p>');
                                     }
-                                })
-                                .catch(error => {
-                                    api.unblock();
-                                    editor.windowManager.alert('Chyba při nahrávání: ' + error.message);
-                                });
+                                }
+                                api.close();
                             }
                         });
 
-                        // Inicializace inputu po otevření dialogu
                         setTimeout(() => {
-                            const fileInput = document.getElementById('simple-image-upload');
-                            const nameDisplay = document.getElementById('file-name-display');
-                            const previewContainer = document.getElementById('image-preview-container');
-                            const previewImage = document.getElementById('image-preview');
-
-                            if (fileInput) {
-                                fileInput.addEventListener('change', function(e) {
-                                    if (e.target.files.length > 0) {
-                                        selectedFile = e.target.files[0];
-                                        nameDisplay.textContent = selectedFile.name;
-                                        
-                                        // Náhled obrázku
-                                        const reader = new FileReader();
-                                        reader.onload = function(e) {
-                                            previewImage.src = e.target.result;
-                                            previewContainer.style.display = 'block';
-                                        }
-                                        reader.readAsDataURL(selectedFile);
-                                    }
+                            const input = document.getElementById('single-image-input');
+                            const preview = document.getElementById('image-preview');
+                            
+                            if (input && preview) {
+                                input.addEventListener('change', e => {
+                                    if (e.target.files.length > 0) uploadImage(e.target.files[0]);
+                                });
+                                
+                                preview.addEventListener('click', () => input.click());
+                                
+                                preview.addEventListener('dragover', e => {
+                                    e.preventDefault();
+                                    preview.style.borderColor = '#4d5aea';
+                                    preview.style.background = '#eef0ff';
+                                });
+                                
+                                preview.addEventListener('dragleave', e => {
+                                    e.preventDefault();
+                                    preview.style.borderColor = '#ccc';
+                                    preview.style.background = '#f8f9fc';
+                                });
+                                
+                                preview.addEventListener('drop', e => {
+                                    e.preventDefault();
+                                    preview.style.borderColor = '#ccc';
+                                    preview.style.background = '#f8f9fc';
+                                    if (e.dataTransfer.files.length > 0) uploadImage(e.dataTransfer.files[0]);
                                 });
                             }
                         }, 100);
@@ -267,7 +304,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                     return;
                                 }
 
-                                // Doplnit https:// pokud chybí
                                 if (!/^https?:\/\//i.test(url) && !/^mailto:/i.test(url) && !/^tel:/i.test(url) && !/^\//.test(url)) {
                                     url = 'https://' + url;
                                 }
@@ -275,16 +311,14 @@ document.addEventListener('DOMContentLoaded', function() {
                                 const linkAttrs = {
                                     href: url,
                                     target: '_blank',
-                                    rel: 'noopener noreferrer' // Bezpečnostní standard pro _blank
+                                    rel: 'noopener noreferrer'
                                 };
 
                                 if (isLink) {
-                                    // Aktualizace existujícího odkazu
                                     editor.dom.setAttribs(selectedNode, linkAttrs);
                                     selectedNode.textContent = text || url;
                                     editor.selection.select(selectedNode);
                                 } else {
-                                    // Vložení nového odkazu
                                     const linkText = text || url;
                                     editor.insertContent(`<a href="${url}" target="_blank" rel="noopener noreferrer">${linkText}</a>`);
                                 }
@@ -295,21 +329,109 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
 
-                // --- GALERIE OBRÁZKŮ (původní kód, zachován) ---
+                // --- GALERIE OBRÁZKŮ (S MULTI-UPLOADEM A STATUS BAREM) ---
                 editor.ui.registry.addButton('imagesgallery', {
                     icon: 'gallery',
-                    tooltip: 'Galerie obrázků (více obrázků vedle sebe)',
+                    tooltip: 'Galerie obrázků',
                     onAction: function() {
-                        let uploadedImages = []; // Resetovat pole při každém otevření
+                        let uploadedImages = [null]; // Start s jedním prázdným slotem
+                        let activeUploads = 0;
+                        let dialogApi = null;
+                        let editingNode = null;
+                        let initialAlt = '';
                         let uploadContainer = null;
+
+                        const selectedNode = editor.selection.getNode();
+                        const existingGallery = editor.dom.getParent(selectedNode, 'div[class*="images-gallery-"]');
                         
+                        if (existingGallery) {
+                            editingNode = existingGallery;
+                            uploadedImages = []; // Vyčistit pro načtení
+                            const imgs = existingGallery.querySelectorAll('img');
+                            imgs.forEach((img, index) => {
+                                uploadedImages.push(img.getAttribute('src'));
+                                if (index === 0) {
+                                    const alt = img.getAttribute('alt') || '';
+                                    initialAlt = alt.replace(/ - \d+$/, '');
+                                }
+                            });
+                            if (uploadedImages.length === 0) uploadedImages.push(null);
+                        }
+
+                        function updateSubmitButton() {
+                            if (dialogApi) {
+                                const isUploading = activeUploads > 0;
+                                dialogApi.setEnabled('submit-btn', !isUploading);
+                                
+                                const statusEl = document.getElementById('gallery-upload-status');
+                                if (statusEl) {
+                                    // Spočítat statistiku
+                                    const finishedCount = uploadedImages.filter(img => img !== null).length;
+                                    const totalCount = Math.max(finishedCount + activeUploads, uploadedImages.length - (uploadedImages[uploadedImages.length-1] === null ? 1 : 0) + activeUploads);
+                                    // Fix total count logic to be robust
+                                    const realTotal = finishedCount + activeUploads;
+                                    
+                                    if (isUploading) {
+                                        statusEl.innerHTML = `<div style="color: #007bff; font-weight: bold; white-space: nowrap;">⏳ Nahrávám (${finishedCount}/${realTotal})</div>`;
+                                    } else {
+                                        if (finishedCount > 0) {
+                                            statusEl.innerHTML = `<div style="color: #28a745; white-space: nowrap; font-weight: bold;">✅ Nahráno (${finishedCount}/${finishedCount})</div>`;
+                                        } else {
+                                            statusEl.innerHTML = editingNode 
+                                                ? '<div style="color: #28a745; white-space: nowrap;">✏️ Režim úprav</div>' 
+                                                : '<div style="color: #666; white-space: nowrap;">Připraveno (0/0)</div>';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        function removeImage(index) {
+                            uploadedImages.splice(index, 1);
+                            if (uploadedImages.length === 0) uploadedImages.push(null);
+                            createUploadFields();
+                            updateSubmitButton(); // Aktualizovat status
+                        }
+
+                        function handleFiles(files, startIndex) {
+                            if (files.length === 0) return;
+
+                            const filesToUpload = [];
+                            // Pokud nahráváme do posledního prázdného slotu, chceme ho nahradit a pak přidat další
+                            // Ale loop níže to řeší posouváním indexu
+                            
+                            for (let i = 0; i < files.length; i++) {
+                                const targetIndex = startIndex + i;
+                                if (targetIndex >= 10) break; 
+                                
+                                filesToUpload.push({ file: files[i], index: targetIndex });
+                                
+                                // Zajistit, že pole je dost dlouhé
+                                while (targetIndex >= uploadedImages.length) {
+                                    uploadedImages.push(null);
+                                }
+                            }
+                            
+                            createUploadFields();
+                            
+                            filesToUpload.forEach(item => {
+                                uploadImage(item.file, item.index);
+                            });
+                        }
+
                         function uploadImage(file, index) {
                             const formData = new FormData();
                             formData.append('file', file);
                             
-                            const preview = document.getElementById('preview-' + index);
-                            preview.innerHTML = '<span style="color: #666;">Nahrávám...</span>';
+                            // Okamžitá vizuální zpětná vazba
+                            setTimeout(() => {
+                                const preview = document.getElementById('preview-' + (index + 1));
+                                if (preview) preview.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#007bff;"><span class="tox-spinner"></span>&nbsp;Nahrávám...</div>';
+                            }, 0);
                             
+                            activeUploads++;
+                            updateSubmitButton();
+
                             return fetch('/admin/upload-image', {
                                 method: 'POST',
                                 body: formData
@@ -317,124 +439,155 @@ document.addEventListener('DOMContentLoaded', function() {
                             .then(response => response.json())
                             .then(result => {
                                 if (result && result.location) {
-                                    uploadedImages[index - 1] = result.location;
-                                    preview.innerHTML = '<img src="' + result.location + '" style="max-width: 100%; max-height: 150px; border-radius: 4px; object-fit: contain;">';
+                                    uploadedImages[index] = result.location;
+                                    createUploadFields();
                                     return result.location;
                                 } else {
-                                    preview.innerHTML = '<span style="color: red;">Chyba: Chybí "location" v odpovědi serveru.</span>';
-                                    throw new Error('Chybí location v odpovědi');
+                                    throw new Error('Chybí location');
                                 }
                             })
                             .catch(error => {
-                                preview.innerHTML = '<span style="color: red;">Chyba při nahrávání: ' + error.message + '</span>';
-                                throw error;
+                                console.error(error);
+                                setTimeout(() => {
+                                    const preview = document.getElementById('preview-' + (index + 1));
+                                    if (preview) preview.innerHTML = '<span style="color: red;">Chyba uploadu</span>';
+                                }, 0);
+                            })
+                            .finally(() => {
+                                activeUploads--;
+                                updateSubmitButton();
                             });
                         }
                         
                         function createUploadFields() {
-                            if (!uploadContainer) {
-                                return;
-                            }
-                            
+                            if (!uploadContainer) return;
                             uploadContainer.innerHTML = '';
                             
-                            // Pokud je pole uploadedImages prázdné nebo kratší než aktuální počet inputů,
-                            // chceme začít s jedním prázdným inputem
-                            const currentImagesCount = uploadedImages.filter(img => img).length;
-                            const inputsToShow = Math.min(Math.max(currentImagesCount + 1, 1), 10);
+                            uploadedImages.forEach((imgUrl, index) => {
+                                createSingleUploadField(index, imgUrl);
+                            });
                             
-                            // Vytvoření inputů
-                            for (let i = 1; i <= inputsToShow; i++) {
-                                createSingleUploadField(i);
-                            }
-                            
-                            // Tlačítko pro přidání další fotky
-                            const addButtonContainer = document.createElement('div');
-                            addButtonContainer.className = 'mt-3 text-center';
-                            
-                            const addButton = document.createElement('button');
-                            addButton.type = 'button';
-                            addButton.className = 'tox-button tox-button--secondary';
-                            addButton.textContent = '+ Přidat další fotku';
-                            addButton.style.width = '100%';
-                            
-                            addButton.onclick = function() {
-                                const currentInputs = uploadContainer.querySelectorAll('.upload-field-group').length;
-                                if (currentInputs < 10) {
-                                    createSingleUploadField(currentInputs + 1);
-                                } else {
-                                    editor.windowManager.alert('Maximální počet fotek je 10.');
-                                }
-                            };
-                            
-                            if (inputsToShow < 10) {
-                                addButtonContainer.appendChild(addButton);
-                                uploadContainer.appendChild(addButtonContainer);
+                            if (uploadedImages.length < 10) {
+                                const btnDiv = document.createElement('div');
+                                btnDiv.className = 'text-center mt-3';
+                                const btn = document.createElement('button');
+                                btn.type = 'button';
+                                btn.className = 'tox-button tox-button--secondary';
+                                btn.textContent = '+ Přidat další fotku';
+                                btn.onclick = function() {
+                                    uploadedImages.push(null);
+                                    createUploadFields();
+                                };
+                                btnDiv.appendChild(btn);
+                                uploadContainer.appendChild(btnDiv);
                             }
                         }
 
-                        function createSingleUploadField(index) {
-                            if (document.getElementById('upload-group-' + index)) return;
-
+                        function createSingleUploadField(index, imgUrl) {
+                            const uiIndex = index + 1;
                             const uploadDiv = document.createElement('div');
                             uploadDiv.className = 'mb-3 upload-field-group';
-                            uploadDiv.id = 'upload-group-' + index;
                             
                             const label = document.createElement('label');
-                            label.textContent = 'Obrázek ' + index;
+                            label.textContent = 'Obrázek ' + uiIndex;
                             label.className = 'form-label';
+                            label.style.fontWeight = 'bold';
+                            label.style.fontSize = '0.9em';
                             
                             const fileInput = document.createElement('input');
                             fileInput.type = 'file';
                             fileInput.accept = 'image/*';
                             fileInput.className = 'form-control';
                             fileInput.multiple = true; 
+                            fileInput.style.display = 'none'; // Skrýt standardní input, použijeme custom UI
                             
+                            // Custom dropzone UI
                             const preview = document.createElement('div');
-                            preview.id = 'preview-' + index;
-                            preview.className = 'mt-2';
-                            preview.style.minHeight = '50px';
-                            preview.style.padding = '10px';
-                            preview.style.border = '1px solid #e4e6ef';
+                            preview.id = 'preview-' + uiIndex;
+                            preview.className = 'dropzone';
+                            preview.style.minHeight = '120px';
+                            preview.style.border = '2px dashed #ccc';
                             preview.style.borderRadius = '8px';
-                            preview.style.backgroundColor = '#f8f9fc';
-                            preview.style.textAlign = 'center';
-                            preview.style.color = '#b5b5c3';
+                            preview.style.padding = '10px';
                             preview.style.display = 'flex';
                             preview.style.alignItems = 'center';
                             preview.style.justifyContent = 'center';
+                            preview.style.cursor = 'pointer';
+                            preview.style.position = 'relative';
+                            preview.style.background = '#f8f9fc';
+                            preview.style.transition = 'all 0.2s';
                             
-                            if (uploadedImages[index-1]) {
-                                preview.innerHTML = '<img src="' + uploadedImages[index-1] + '" style="max-width: 100%; max-height: 150px; border-radius: 4px; object-fit: contain;">';
+                            if (imgUrl) {
+                                preview.style.border = '1px solid #ddd';
+                                preview.style.background = '#fff';
+                                const img = document.createElement('img');
+                                img.src = imgUrl;
+                                img.style.maxWidth = '100%';
+                                img.style.maxHeight = '180px';
+                                img.style.borderRadius = '4px';
+                                img.style.objectFit = 'contain';
+                                img.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
+                                
+                                const removeBtn = document.createElement('button');
+                                removeBtn.innerHTML = '×';
+                                removeBtn.style.position = 'absolute';
+                                removeBtn.style.top = '-10px';
+                                removeBtn.style.right = '-10px';
+                                removeBtn.style.background = '#dc3545';
+                                removeBtn.style.color = 'white';
+                                removeBtn.style.border = 'none';
+                                removeBtn.style.borderRadius = '50%';
+                                removeBtn.style.width = '28px';
+                                removeBtn.style.height = '28px';
+                                removeBtn.style.fontSize = '18px';
+                                removeBtn.style.lineHeight = '1';
+                                removeBtn.style.cursor = 'pointer';
+                                removeBtn.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+                                removeBtn.title = 'Odstranit obrázek';
+                                removeBtn.onclick = (e) => { e.stopPropagation(); removeImage(index); };
+                                
+                                preview.appendChild(img);
+                                preview.appendChild(removeBtn);
                             } else {
-                                preview.textContent = 'Přetáhněte obrázek sem nebo klikněte pro výběr';
+                                preview.innerHTML = `
+                                    <div style="text-align:center; color: #888;">
+                                        <div style="font-size: 24px; margin-bottom: 5px;">📂</div>
+                                        <div>Klikněte nebo přetáhněte fotky</div>
+                                        <div style="font-size: 0.8em; color: #aaa;">(Podpora více souborů)</div>
+                                    </div>
+                                `;
+                                preview.onclick = (e) => { if(e.target.tagName !== 'BUTTON') fileInput.click(); };
                             }
                             
+                            // Drag & Drop events
                             preview.addEventListener('dragover', function(e) {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 preview.style.borderColor = '#4d5aea';
-                                preview.style.backgroundColor = '#f0f1ff';
+                                preview.style.backgroundColor = '#eef0ff';
+                                preview.style.transform = 'scale(1.02)';
                             });
                             
                             preview.addEventListener('dragleave', function(e) {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                preview.style.borderColor = '#e4e6ef';
-                                preview.style.backgroundColor = '#f8f9fc';
+                                preview.style.borderColor = imgUrl ? '#ddd' : '#ccc';
+                                preview.style.backgroundColor = imgUrl ? '#fff' : '#f8f9fc';
+                                preview.style.transform = 'scale(1)';
                             });
                             
                             preview.addEventListener('drop', function(e) {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                preview.style.borderColor = '#e4e6ef';
-                                preview.style.backgroundColor = '#f8f9fc';
+                                preview.style.borderColor = imgUrl ? '#ddd' : '#ccc';
+                                preview.style.backgroundColor = imgUrl ? '#fff' : '#f8f9fc';
+                                preview.style.transform = 'scale(1)';
                                 
                                 const files = e.dataTransfer.files;
                                 handleFiles(files, index);
                             });
                             
-                            fileInput.addEventListener('change', function(e) {
+                            fileInput.addEventListener('change', e => {
                                 const files = e.target.files;
                                 handleFiles(files, index);
                             });
@@ -442,102 +595,90 @@ document.addEventListener('DOMContentLoaded', function() {
                             uploadDiv.appendChild(label);
                             uploadDiv.appendChild(fileInput);
                             uploadDiv.appendChild(preview);
-                            
-                            const btnContainer = uploadContainer.querySelector('.text-center');
-                            if (btnContainer) {
-                                uploadContainer.insertBefore(uploadDiv, btnContainer);
-                            } else {
-                                uploadContainer.appendChild(uploadDiv);
-                            }
-                        }
-
-                        function handleFiles(files, startIndex) {
-                            if (files.length > 0) {
-                                const remainingSlots = 10 - startIndex + 1;
-                                const filesToProcess = Math.min(files.length, remainingSlots);
-                                
-                                for (let i = 0; i < filesToProcess; i++) {
-                                    const currentIndex = startIndex + i;
-                                    if (!document.getElementById('upload-group-' + currentIndex)) {
-                                        createSingleUploadField(currentIndex);
-                                    }
-                                    uploadImage(files[i], currentIndex);
-                                }
-                            }
+                            uploadContainer.appendChild(uploadDiv);
                         }
                         
-                        
-                        const dialog = editor.windowManager.open({
-                            title: 'Vložit galerii obrázků',
+                        dialogApi = editor.windowManager.open({
+                            title: editingNode ? 'Upravit galerii' : 'Vložit galerii',
                             body: {
                                 type: 'panel',
                                 items: [
-                                    {
-                                        type: 'input',
-                                        name: 'gallery_alt',
-                                        label: 'Společný popis galerie (Alt text)',
-                                        placeholder: 'Např. Závod Českého poháru v Peci pod Sněžkou'
-                                    },
-                                    {
-                                        type: 'htmlpanel',
-                                        html: '<div id="gallery-upload-container" style="margin-top: 15px;"></div>'
-                                    }
+                                    { type: 'input', name: 'gallery_alt', label: 'Popis galerie', placeholder: 'Popis' },
+                                    { type: 'htmlpanel', html: '<div id="gallery-upload-status"></div><div id="gallery-upload-container" style="max-height: 400px; overflow-y: auto; padding: 5px;"></div>' }
                                 ]
                             },
+                            initialData: { gallery_alt: initialAlt },
                             buttons: [
-                                {
-                                    type: 'cancel',
-                                    text: 'Zrušit'
-                                },
-                                {
-                                    type: 'submit',
-                                    text: 'Vložit',
-                                    primary: true
-                                }
+                                { type: 'cancel', text: 'Zrušit' },
+                                { type: 'submit', name: 'submit-btn', text: editingNode ? 'Uložit' : 'Vložit', primary: true }
                             ],
                             onSubmit: function(api) {
-                                const filledImages = uploadedImages.filter(img => img !== undefined && img !== null);
-                                const imageCount = filledImages.length;
+                                const filledImages = uploadedImages.filter(img => img);
+                                if (filledImages.length < 2) {
+                                    editor.windowManager.alert('Galerie musí mít alespoň 2 obrázky.');
+                                    return;
+                                }
                                 
                                 const data = api.getData();
-                                const baseAlt = data.gallery_alt ? data.gallery_alt.trim() : '';
+                                const baseAlt = data.gallery_alt || '';
+                                const className = 'images-gallery-' + Math.min(filledImages.length, 4);
                                 
-                                if (imageCount < 2) {
-                                    editor.windowManager.alert('Prosím nahrajte alespoň 2 obrázky pro galerii.');
-                                    return;
-                                }
-                                
-                                if (imageCount > 10) {
-                                    editor.windowManager.alert('Galerie může obsahovat maximálně 10 obrázků.');
-                                    return;
-                                }
-                                
-                                // Vytvoření HTML struktury
-                                const className = 'images-gallery-' + Math.min(imageCount, 4);
-                                let html = '<div class="' + className + '" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">';
-                                
-                                filledImages.forEach(function(imgUrl, index) {
-                                    const altText = baseAlt ? (baseAlt + ' - ' + (index + 1)) : '';
-                                    html += '<img src="' + imgUrl + '" alt="' + altText + '" style="width: 100%; height: auto; object-fit: cover;">';
+                                let html = '<div class="' + className + '">';
+                                filledImages.forEach((url, idx) => {
+                                    const alt = baseAlt ? baseAlt + ' - ' + (idx+1) : '';
+                                    html += `<img src="${url}" alt="${alt}" class="img-fluid">`;
                                 });
-                                
                                 html += '</div><p><br></p>';
-                                editor.insertContent(html);
                                 
-                                setTimeout(function() {
-                                    editor.selection.setCursorLocation(editor.getBody().lastChild, 0);
-                                }, 100);
-                                
+                                if (editingNode) {
+                                    editor.undoManager.transact(() => {
+                                        editor.dom.replace(editor.dom.createFragment(html), editingNode);
+                                    });
+                                } else {
+                                    editor.insertContent(html);
+                                }
                                 api.close();
                             }
                         });
                         
-                        setTimeout(function() {
+                        // DOM Hack pro přesun statusu do footeru - ROBUSTNÍ VERZE
+                        setTimeout(() => {
+                            const statusDiv = document.getElementById('gallery-upload-status');
+                            const dialogEl = document.querySelector('.tox-dialog');
+                            
+                            if (statusDiv && dialogEl) {
+                                const footer = dialogEl.querySelector('.tox-dialog__footer');
+                                
+                                if (footer) {
+                                    // Stylování statusu
+                                    statusDiv.style.marginTop = '0';
+                                    statusDiv.style.marginRight = 'auto'; // Klíčové pro zarovnání doleva v flexboxu
+                                    statusDiv.style.marginLeft = '10px';
+                                    statusDiv.style.alignSelf = 'center';
+                                    statusDiv.style.display = 'flex';
+                                    statusDiv.style.alignItems = 'center';
+                                    statusDiv.style.fontSize = '14px';
+                                    statusDiv.style.flex = '1'; // Zabrat volné místo
+                                    
+                                    // Vložení na začátek footeru
+                                    const footerStart = footer.querySelector('.tox-dialog__footer-start');
+                                    if (footerStart) {
+                                        footerStart.style.display = 'flex';
+                                        footerStart.style.flex = '1'; // Aby start container zabral místo
+                                        footerStart.appendChild(statusDiv);
+                                    } else {
+                                        // Fallback pokud footer-start neexistuje
+                                        footer.insertBefore(statusDiv, footer.firstChild);
+                                    }
+                                }
+                            }
+                            
                             uploadContainer = document.getElementById('gallery-upload-container');
                             if (uploadContainer) {
                                 createUploadFields();
+                                updateSubmitButton();
                             }
-                        }, 200);
+                        }, 100);
                     }
                 });
 
