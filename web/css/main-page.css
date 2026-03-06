@@ -17,19 +17,19 @@
 
 
 ::-webkit-scrollbar {
-
-    background-color: #00000F;
-
+    width: 10px; /* Slim width */
+    height: 10px; /* Slim height for horizontal */
+    background-color: #00000F; /* Match body bg */
 }
 
-
-
 ::-webkit-scrollbar-thumb {
+    background-color: #4A4D5E; /* Lighter grey for better visibility */
+    border-radius: 10px;
+    border: 2px solid #00000F;
+}
 
-    background-color: #171925;
-
-    border-radius: 25px;
-
+::-webkit-scrollbar-thumb:hover {
+    background-color: #f1008d; /* Brand pink on interaction */
 }
 
 

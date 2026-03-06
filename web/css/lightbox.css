@@ -210,7 +210,6 @@
 
 #lightbox-close:hover {
     opacity: 1;
-    transform: rotate(90deg);
     color: #f1008d;
 }
 

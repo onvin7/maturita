@@ -445,6 +445,12 @@
 - ✅ TrackingHelper podporuje Meta Pixel generování
 - ✅ Automatické trackování PageView na všech stránkách
 
+### 🎨 Design & UX Vylepšení (Galerie & Lightbox)
+- ✅ **Oprava galerie** - Nový "Cool" Grid layout pro 1-5+ fotek, responzivita, ořez (object-fit: cover)
+- ✅ **Oprava Lightboxu** - Zobrazení na výšku bez černých pruhů, fix scrollování stránky, overlay "+X", moderní UI prvky
+- ✅ **Samostatné obrázky** - Oprava klikatelnosti a zobrazení v lightboxu pro obrázky v textu mimo galerie
+- ✅ **Moderní Scrollbar** - Nový "Slim" design (10px), brandové barvy (tmavá + růžová při hoveru), plovoucí efekt
+
 ---
 
 ## 📝 Poznámky

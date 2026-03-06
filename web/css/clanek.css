@@ -141,16 +141,34 @@ body {
   max-width: 100%;
   height: auto;
   margin-block: 15px;
+  /* Přidání stylů pro zachování konzistence */
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.clanek figcaption {
-  font-size: 14px;
-  color: grey;
-  text-align: center;
-  font-weight: 500;
-  font-style: italic;
-  margin-top: 0;
-  margin-bottom: 15px;
+/* Posílení stylů pro figcaption, aby fungovaly i v text-editoru */
+.clanek figcaption,
+.container-zobrazit .text .text-editor figcaption {
+  font-size: 14px !important;
+  color: grey !important;
+  text-align: center !important;
+  font-weight: 500 !important;
+  font-style: italic !important;
+  margin-top: 0 !important;
+  margin-bottom: 15px !important;
+  display: block !important;
+  font-family: 'Fira Sans Condensed', sans-serif !important;
+  line-height: 1.4 !important;
+}
+
+/* Styly pro samostatné obrázky vložené přímo do textu (mimo <figure>) */
+.clanek .obsah img:not(.gallery-grid img):not(.parallax-image):not(.foto-header img) {
+    max-width: 100%;
+    height: auto;
+    margin: 20px auto;
+    display: block;
+    cursor: pointer; /* Indikace, že jde rozkliknout */
 }
 
 .clanek .obsah .autor {
@@ -788,7 +806,7 @@ span[data-pin-log="embed"] > span {
 }
 
 /* Galerie obrázků - 2 obrázky vedle sebe */
-.container-zobrazit .text .text-editor .images-gallery-2,
+/*.container-zobrazit .text .text-editor .images-gallery-2,
 .clanek .obsah .images-gallery-2 {
   display: flex;
   flex-direction: row;
@@ -805,10 +823,10 @@ span[data-pin-log="embed"] > span {
   height: auto;
   object-fit: contain;
   cursor: pointer;
-}
+}*/
 
 /* Galerie obrázků - 3 obrázky: 2 vedle sebe, 1 pod nimi */
-.container-zobrazit .text .text-editor .images-gallery-3,
+/*.container-zobrazit .text .text-editor .images-gallery-3,
 .clanek .obsah .images-gallery-3 {
   display: flex;
   flex-direction: row;
@@ -826,19 +844,19 @@ span[data-pin-log="embed"] > span {
   height: auto;
   object-fit: contain;
   cursor: pointer;
-}
+}*/
 
 /* 3. obrázek (sám na řádku) - vycentrovat pouze na desktopu */
-@media screen and (min-width: 769px) {
+/*@media screen and (min-width: 769px) {
   .container-zobrazit .text .text-editor .images-gallery-3 img:nth-child(3),
   .clanek .obsah .images-gallery-3 img:nth-child(3) {
     margin-left: auto !important;
     margin-right: auto !important;
   }
-}
+}*/
 
 /* Galerie obrázků - 4 obrázky: 2 vedle sebe, 2 pod nimi */
-.container-zobrazit .text .text-editor .images-gallery-4,
+/*.container-zobrazit .text .text-editor .images-gallery-4,
 .clanek .obsah .images-gallery-4 {
   display: flex;
   flex-direction: row;
@@ -856,10 +874,10 @@ span[data-pin-log="embed"] > span {
   height: auto;
   object-fit: contain;
   cursor: pointer;
-}
+}*/
 
 /* Responsive chování - na mobilu pod sebou */
-@media screen and (max-width: 768px) {
+/*@media screen and (max-width: 768px) {
   .container-zobrazit .text .text-editor .images-gallery-2,
   .clanek .obsah .images-gallery-2,
   .container-zobrazit .text .text-editor .images-gallery-3,
@@ -885,7 +903,7 @@ span[data-pin-log="embed"] > span {
     object-fit: contain !important;
   }
   
-}
+}*/
 
 .container-zobrazit .foto-header {
   width: 100%;

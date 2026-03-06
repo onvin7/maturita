@@ -1,21 +1,18 @@
 /* Gallery Fix - Opravy vzhledu galerie a lightboxu */
 
-/* 1. & 2. Šířka a pozadí galerie */
+/* 1. Základní nastavení kontejneru galerie */
 div[class*="images-gallery-"] {
+    display: grid !important;
     width: 80% !important;
     max-width: 80% !important;
     margin: 30px auto !important;
-    background-color: transparent !important; /* Odstranění černého pozadí */
+    gap: 4px !important;
+    background: transparent !important;
     border-radius: 12px !important;
     overflow: hidden !important;
-    /* Reset grid layoutu pro lepší kontrolu */
-    display: flex !important;
-    flex-wrap: wrap !important;
-    justify-content: center !important;
-    gap: 4px !important;
 }
 
-/* Responsivita pro mobily */
+/* Responsivita - na mobilu přes celou šířku */
 @media screen and (max-width: 768px) {
     div[class*="images-gallery-"] {
         width: 100% !important;
@@ -23,53 +20,32 @@ div[class*="images-gallery-"] {
     }
 }
 
-/* 3. Wrapper a obrázky */
+/* 2. Skrytí nadbytečných obrázků (zobrazit max 5) */
+div[class*="images-gallery-"] .gallery-item-wrapper:nth-child(n+6) {
+    display: none !important;
+}
+
+/* 3. Stylování wrapperu obrázku */
 .gallery-item-wrapper {
     position: relative !important;
-    background-color: transparent !important;
+    background-color: #171925 !important; /* Tmavé pozadí pod obrázkem */
     overflow: hidden !important;
-    border-radius: 4px !important;
-    flex: 1 1 200px !important; /* Flexibilní šířka */
-    max-width: 49% !important; /* Aby byly max 2 vedle sebe, nebo upravit dle počtu */
-    height: 200px !important; /* Pevná výška kontejneru */
     margin: 0 !important;
-}
-
-/* Specifické rozložení pro různé počty obrázků pro zachování gridu */
-div[class*="images-gallery-1"] .gallery-item-wrapper {
-    max-width: 100% !important;
-    height: auto !important;
-    max-height: 500px !important;
-}
-
-div[class*="images-gallery-2"] .gallery-item-wrapper {
-    max-width: calc(50% - 2px) !important;
-}
-
-div[class*="images-gallery-3"] .gallery-item-wrapper {
-    max-width: calc(33.33% - 3px) !important;
-}
-
-div[class*="images-gallery-4"] .gallery-item-wrapper {
-    max-width: calc(50% - 2px) !important;
-}
-
-div[class*="images-gallery-"] img {
     width: 100% !important;
     height: 100% !important;
-    max-height: 200px !important; /* Omezení výšky náhledu */
-    object-fit: cover !important; /* Zachování poměru stran s ořezem */
+}
+
+/* 4. Stylování samotných obrázků - COOL OŘEZ */
+.gallery-item-wrapper img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important; /* Klíčové pro ořez */
     display: block !important;
     opacity: 1 !important;
     transition: transform 0.3s ease, opacity 0.3s ease !important;
 }
 
-div[class*="images-gallery-1"] img {
-    max-height: 500px !important;
-    object-fit: contain !important;
-}
-
-/* 4. Hover efekt - ztmavení a modrý překryv */
+/* Hover efekty */
 .gallery-item-wrapper::after {
     content: '' !important;
     position: absolute !important;
@@ -80,7 +56,7 @@ div[class*="images-gallery-1"] img {
     background-color: rgba(135, 206, 235, 0.4) !important; /* Světle modrá */
     opacity: 0 !important;
     transition: opacity 0.3s ease !important;
-    pointer-events: none !important; /* Aby neblokovalo kliknutí */
+    pointer-events: none !important;
     z-index: 2;
 }
 
@@ -93,26 +69,256 @@ div[class*="images-gallery-1"] img {
     transform: scale(1.05) !important;
 }
 
-/* 5. Styl překryvu s číslem (+X) */
+/* 5. GRID LAYOUTY podle počtu fotek (data-count) */
+
+/* 1 Fotka */
+.gallery-grid[data-count="1"] {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+}
+.gallery-grid[data-count="1"] .gallery-item-wrapper {
+    height: 450px !important;
+}
+.gallery-grid[data-count="1"] img {
+    object-fit: cover !important; /* Jednu fotku chceme vidět celou, ale bez černých pruhů */
+    background-color: transparent !important;
+}
+
+/* 2 Fotky */
+.gallery-grid[data-count="2"] {
+    grid-template-columns: 1fr 1fr !important;
+    height: auto !important;
+    align-items: stretch;
+}
+.gallery-grid[data-count="2"] .gallery-item-wrapper {
+    height: 350px !important;
+}
+
+/* 3 Fotky - Zobrazit jen 2, 3. skrytá */
+.gallery-grid[data-count="3"] {
+    grid-template-columns: 1fr 1fr !important;
+    height: auto !important;
+    grid-template-rows: auto !important;
+    align-items: stretch;
+}
+.gallery-grid[data-count="3"] .gallery-item-wrapper {
+    height: 350px !important; /* Stejné jako pro 2 fotky */
+}
+/* Skrýt 3. fotku */
+.gallery-grid[data-count="3"] .gallery-item-wrapper:nth-child(3) {
+    display: none !important;
+}
+
+/* 4 Fotky - Zobrazit jen 3, 4. skrytá */
+/* Layout pro 3 fotky: 1 nahoře (plná), 2 dole */
+.gallery-grid[data-count="4"] {
+    grid-template-columns: 1fr 1fr !important;
+    height: auto !important;
+    grid-template-rows: 400px 250px !important;
+}
+/* První fotka přes celou šířku */
+.gallery-grid[data-count="4"] .gallery-item-wrapper:nth-child(1) {
+    grid-column: span 2 !important;
+    height: 100% !important;
+}
+/* Zbylé dvě vedle sebe */
+.gallery-grid[data-count="4"] .gallery-item-wrapper:nth-child(2),
+.gallery-grid[data-count="4"] .gallery-item-wrapper:nth-child(3) {
+    height: 100% !important;
+    grid-column: span 1 !important; /* Reset spanu */
+}
+/* Skrýt 4. fotku */
+.gallery-grid[data-count="4"] .gallery-item-wrapper:nth-child(4) {
+    display: none !important;
+}
+
+/* 5 a více fotek - Layout 2 nahoře, 3 dole */
+.gallery-grid[data-count="5"], 
+.gallery-grid[data-count="6"], 
+.gallery-grid[data-count="7"], 
+.gallery-grid[data-count="8"], 
+.gallery-grid[data-count="9"], 
+.gallery-grid[data-count="10"] {
+    grid-template-columns: repeat(6, 1fr) !important;
+    grid-template-rows: 300px 200px !important;
+    height: auto !important;
+}
+
+/* První dva zabírají polovinu šířky (3 sloupce z 6) */
+.gallery-grid[data-count="5"] .gallery-item-wrapper:nth-child(1), .gallery-grid[data-count="5"] .gallery-item-wrapper:nth-child(2),
+.gallery-grid[data-count="6"] .gallery-item-wrapper:nth-child(1), .gallery-grid[data-count="6"] .gallery-item-wrapper:nth-child(2),
+.gallery-grid[data-count="7"] .gallery-item-wrapper:nth-child(1), .gallery-grid[data-count="7"] .gallery-item-wrapper:nth-child(2),
+.gallery-grid[data-count="8"] .gallery-item-wrapper:nth-child(1), .gallery-grid[data-count="8"] .gallery-item-wrapper:nth-child(2),
+.gallery-grid[data-count="9"] .gallery-item-wrapper:nth-child(1), .gallery-grid[data-count="9"] .gallery-item-wrapper:nth-child(2),
+.gallery-grid[data-count="10"] .gallery-item-wrapper:nth-child(1), .gallery-grid[data-count="10"] .gallery-item-wrapper:nth-child(2) {
+    grid-column: span 3 !important;
+}
+
+/* Další tři zabírají třetinu šířky (2 sloupce z 6) */
+.gallery-grid[data-count="5"] .gallery-item-wrapper:nth-child(3), .gallery-grid[data-count="5"] .gallery-item-wrapper:nth-child(4), .gallery-grid[data-count="5"] .gallery-item-wrapper:nth-child(5),
+.gallery-grid[data-count="6"] .gallery-item-wrapper:nth-child(3), .gallery-grid[data-count="6"] .gallery-item-wrapper:nth-child(4), .gallery-grid[data-count="6"] .gallery-item-wrapper:nth-child(5),
+.gallery-grid[data-count="7"] .gallery-item-wrapper:nth-child(3), .gallery-grid[data-count="7"] .gallery-item-wrapper:nth-child(4), .gallery-grid[data-count="7"] .gallery-item-wrapper:nth-child(5),
+.gallery-grid[data-count="8"] .gallery-item-wrapper:nth-child(3), .gallery-grid[data-count="8"] .gallery-item-wrapper:nth-child(4), .gallery-grid[data-count="8"] .gallery-item-wrapper:nth-child(5),
+.gallery-grid[data-count="9"] .gallery-item-wrapper:nth-child(3), .gallery-grid[data-count="9"] .gallery-item-wrapper:nth-child(4), .gallery-grid[data-count="9"] .gallery-item-wrapper:nth-child(5),
+.gallery-grid[data-count="10"] .gallery-item-wrapper:nth-child(3), .gallery-grid[data-count="10"] .gallery-item-wrapper:nth-child(4), .gallery-grid[data-count="10"] .gallery-item-wrapper:nth-child(5) {
+    grid-column: span 2 !important;
+}
+
+/* Overlay +X */
 .gallery-overlay {
-    background-color: rgba(0, 0, 0, 0.5) !important; /* Tmavé pozadí */
-    color: #f1008d !important; /* Růžový text */
+    background-color: rgba(0, 0, 0, 0.6) !important;
+    color: #f1008d !important;
     font-weight: 700 !important;
-    font-size: 2rem !important;
-    backdrop-filter: blur(4px) !important;
+    font-size: 2.5rem !important;
+    backdrop-filter: blur(2px) !important;
     z-index: 3 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
 }
 
-/* Fix pro Lightbox */
+/* Ovládací prvky mimo scroll container */
+.lightbox-btn {
+    position: fixed !important; /* Fixní pozice, aby neujely při scrollu */
+    z-index: 2000000005 !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+}
+
+/* Lightbox fix */
 #lightbox {
     background: rgba(23, 25, 37, 0.98) !important;
+    display: none !important; /* Defaultně skryto */
+}
+
+#lightbox.active {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+}
+
+/* === LIGHTBOX - Standardní chování (žádné scrollování) === */
+
+#lightbox-content {
+    flex: 1 !important; /* Zabere veškeré volné místo */
+    height: auto !important; /* Reset fixní výšky */
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    overflow: hidden !important;
+    position: relative !important;
+    width: 100% !important;
+}
+
+#lightbox-thumbnails {
+    position: relative !important; /* Už ne fixed, ale součástí flex flow */
+    bottom: auto !important;
+    left: auto !important;
+    width: 100% !important;
+    z-index: 2000000005 !important;
+    background: rgba(23, 25, 37, 0.9) !important;
+    border-top: 1px solid rgba(255,255,255,0.1) !important;
+    flex-shrink: 0 !important; /* Nesmrskne se */
+    padding: 10px 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    overflow-x: auto !important;
+}
+
+/* Fix pro překrývání počítadla u širokých fotek */
+#lightbox-counter {
+    position: absolute !important; /* V rámci lightbox-content nebo fixed nahoře */
+    top: 20px !important;
+    left: 20px !important;
+    z-index: 2000000006 !important;
+    /* Styl podle webu */
+    background-color: transparent !important; 
+    color: #fff !important;
+    font-family: 'Fira Sans Condensed', sans-serif !important;
+    font-size: 1.2rem !important;
+    font-weight: bold !important;
+    padding: 0 !important;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8) !important;
+}
+
+#lightbox-close {
+    position: absolute !important;
+    top: 20px !important;
+    right: 20px !important;
+    z-index: 2000000006 !important;
+    color: #fff !important;
+    font-size: 3rem !important; /* Větší */
+    font-weight: 700 !important; /* Tlustší */
+    line-height: 0.5 !important;
+    cursor: pointer !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 10px !important;
+    transition: color 0.3s ease !important;
+    font-family: Arial, sans-serif !important; /* Standardní font pro křížek */
+}
+
+#lightbox-close:hover {
+    color: #f1008d !important;
 }
 
 #lightbox-img {
-    max-height: 90vh !important;
-    max-width: 90vw !important;
+    max-height: 90% !important; /* Zmenšeno na 90% aby se nedotýkalo okrajů */
+    max-width: 90% !important; /* Zmenšeno na 90% */
     object-fit: contain !important;
+    height: auto !important;
+    width: auto !important;
+    display: block !important;
+    margin: 0 auto !important;
+}
+
+/* Mobile layout overrides */
+@media screen and (max-width: 600px) {
+    .gallery-grid[data-count="2"] {
+        height: 200px !important;
+    }
+    .gallery-grid[data-count="3"] {
+        grid-template-columns: 1fr !important;
+        height: auto !important;
+        grid-template-rows: repeat(3, 200px) !important;
+    }
+    .gallery-grid[data-count="4"] {
+        grid-template-columns: 1fr 1fr !important;
+        grid-template-rows: 150px 150px !important;
+        height: auto !important;
+    }
+    
+    /* Pro 5+ na mobilu: mřížka 2xX */
+    .gallery-grid[data-count="5"], 
+    .gallery-grid[data-count="6"], 
+    .gallery-grid[data-count="7"], 
+    .gallery-grid[data-count="8"], 
+    .gallery-grid[data-count="9"], 
+    .gallery-grid[data-count="10"] {
+        grid-template-columns: 1fr 1fr !important;
+        grid-template-rows: 200px 200px 200px !important; /* 3 řádky */
+        height: auto !important;
+    }
+    
+    /* Reset spanů pro mobil */
+    .gallery-grid[data-count] .gallery-item-wrapper {
+        grid-column: auto !important;
+    }
+    
+    /* První položka přes celou šířku na mobilu */
+    .gallery-grid[data-count="5"] .gallery-item-wrapper:nth-child(1),
+    .gallery-grid[data-count="6"] .gallery-item-wrapper:nth-child(1),
+    .gallery-grid[data-count="7"] .gallery-item-wrapper:nth-child(1),
+    .gallery-grid[data-count="8"] .gallery-item-wrapper:nth-child(1),
+    .gallery-grid[data-count="9"] .gallery-item-wrapper:nth-child(1),
+    .gallery-grid[data-count="10"] .gallery-item-wrapper:nth-child(1) {
+        grid-column: span 2 !important;
+    }
+    
+    /* Mobilní Lightbox - standardní chování */
+    #lightbox-img {
+        width: auto !important;
+        max-width: 100% !important;
+    }
 }

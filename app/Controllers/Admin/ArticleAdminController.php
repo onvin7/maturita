@@ -484,7 +484,7 @@ class ArticleAdminController
 
         // Použijeme admin layout s veřejnými CSS styly pro náhled
         $adminTitle = "Náhled článku: " . $article['nazev'] . " | Admin Panel - Cyklistickey magazín";
-        $css = ["main-page", "clanek", "autor_clanku"];
+        $css = ["main-page", "clanek", "autor_clanku", "gallery-fix"];
         $useFullWidth = true; // Pro náhled použijeme plnou šířku
         
         // Nastavíme proměnné pro view
