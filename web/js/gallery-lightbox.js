@@ -37,20 +37,28 @@ document.addEventListener('DOMContentLoaded', function() {
         // Přidáme třídu gallery-grid pro CSS stylování
         gallery.classList.add('gallery-grid');
         
+        // Získáme všechny obrázky v galerii
         const images = Array.from(gallery.querySelectorAll('img'));
         const count = images.length;
         gallery.setAttribute('data-count', count);
         
         // Wrapper pro každý obrázek (pro lepší stylování a overlay)
         images.forEach((img, index) => {
+            // Kontrola, zda už wrapper neexistuje (pro případ opakovaného spuštění)
+            if (img.parentElement.classList.contains('gallery-item-wrapper')) return;
+
             const wrapper = document.createElement('div');
             wrapper.className = 'gallery-item-wrapper';
+            
+            // Vložíme wrapper před img a přesuneme img do něj
             img.parentNode.insertBefore(wrapper, img);
             wrapper.appendChild(img);
             
-            // Kliknutí na obrázek otevře lightbox
-            img.addEventListener('click', function(e) {
+            // Kliknutí na wrapper nebo img otevře lightbox
+            // Použijeme wrapper pro click event, aby to fungovalo i na overlay
+            wrapper.addEventListener('click', function(e) {
                 e.preventDefault();
+                e.stopPropagation(); // Zastavíme propagaci
                 openLightbox(images, index);
             });
 
@@ -61,25 +69,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 overlay.className = 'gallery-overlay';
                 overlay.textContent = '+' + (remaining + 1); // +1 protože počítáme i tento pátý
                 
+                // Overlay click handler
                 overlay.addEventListener('click', function(e) {
                     e.preventDefault();
-                    e.stopPropagation(); // Aby se nespustil click na img pod tím dvakrát
+                    e.stopPropagation();
                     openLightbox(images, index);
                 });
                 
                 wrapper.appendChild(overlay);
             }
-            
-            // Skryjeme obrázky nad 5 (CSS grid to řeší, ale pro jistotu nebo jiné layouty)
-            // V našem CSS gridu (data-count="5") jsou definované řádky, co se nevejde, je skryto overflow:hidden gridu
-            // Ale my chceme, aby 6. a další byly v HTML přítomné pro lightbox, ale neviditelné v gridu.
-            // Grid layout s pevnými řádky to zařídí automaticky (budou "pod" viditelnou částí).
         });
     });
 
     // 4. Funkce Lightboxu
     function openLightbox(imagesElements, index) {
-        currentGalleryImages = imagesElements.map(img => img.src);
+        // Získáme URL všech obrázků v galerii
+        currentGalleryImages = imagesElements.map(img => {
+            // Pokud je obrázek obalen odkazem, zkusíme vzít href odkazu (plná verze)
+            // Jinak vezmeme src obrázku
+            const parentLink = img.closest('a');
+            return parentLink ? parentLink.href : img.src;
+        });
+        
         currentIndex = index;
         
         updateLightboxContent();
@@ -97,6 +108,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateLightboxContent() {
+        if (!currentGalleryImages[currentIndex]) return;
+        
         lightboxImg.src = currentGalleryImages[currentIndex];
         counter.textContent = (currentIndex + 1) + ' / ' + currentGalleryImages.length;
         
@@ -114,12 +127,14 @@ document.addEventListener('DOMContentLoaded', function() {
         renderThumbnails();
     }
 
-    function showNext() {
+    function showNext(e) {
+        if(e) e.stopPropagation();
         currentIndex = (currentIndex + 1) % currentGalleryImages.length;
         updateLightboxContent();
     }
 
-    function showPrev() {
+    function showPrev(e) {
+        if(e) e.stopPropagation();
         currentIndex = (currentIndex - 1 + currentGalleryImages.length) % currentGalleryImages.length;
         updateLightboxContent();
     }
@@ -134,7 +149,8 @@ document.addEventListener('DOMContentLoaded', function() {
             thumb.className = 'lightbox-thumb';
             if (idx === currentIndex) thumb.classList.add('active');
             
-            thumb.addEventListener('click', function() {
+            thumb.addEventListener('click', function(e) {
+                e.stopPropagation();
                 currentIndex = idx;
                 updateLightboxContent();
             });
@@ -150,7 +166,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Event listenery ovládání
-    closeBtn.addEventListener('click', closeLightbox);
+    closeBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeLightbox();
+    });
+    
     nextBtn.addEventListener('click', showNext);
     prevBtn.addEventListener('click', showPrev);
 
