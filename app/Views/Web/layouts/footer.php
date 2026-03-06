@@ -83,7 +83,7 @@
     <div class="prava">
 
         <p>
-            <a href="/obchodni-podminky">Obchodní podmínky</a> | <a href="/ochrana-osobnich-udaju">Ochrana osobních údajů</a>
+            <a href="/obchodni-podminky">Podmínky užívání</a> | <a href="/ochrana-osobnich-udaju">Ochrana osobních údajů</a>
         </p>
 
     </div>

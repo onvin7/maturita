@@ -35,9 +35,9 @@ Tento dokument slouží jako centrální rozvrh prací. Úkoly jsou seřazeny lo
 *   [ ] **Databáze:** Vytvořit tabulku `reklamy`.
 *   [ ] **Frontend:** Zobrazování reklamních bannerů v článcích a sidebarech.
 
-## 📅 5. Events Systém (Závody)
-*   [ ] **Admin:** Rozhraní pro správu závodů.
-*   [ ] **Frontend:** Výpis kalendáře závodů.
+## 📅 5. Events Systém (Závody) - ✅ HOTOVO
+*   [x] **Frontend:** Zobrazit informaci o přesunu závodů na projekt "Bav se sportem".
+*   [x] **Admin:** Správa závodů se ruší.
 
 ## ⚖️ 6. GDPR & Legislativa
 *   [ ] **Cookie Lišta:** Nasadit řešení pro souhlas s cookies.

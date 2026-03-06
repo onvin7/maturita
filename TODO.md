@@ -273,12 +273,9 @@
 ## 🟡 Důležité úkoly
 
 ### 4. Events systém (závody)
-- [ ] Vytvořit admin rozhraní pro správu závodů (CRUD)
-- [ ] Migrovat existující závody do databáze
-  - `cyklistickey_race.php` → databáze
-  - `bezeckey_race.php` → databáze
-- [ ] Upravit view, aby používalo data z DB místo statických souborů
-- [ ] (Volitelné) Odstranit staré PHP soubory závodů
+- [x] **Upravit sekci Závody** - ✅ HOTOVO
+  - Zobrazit informaci: "Naše závody jsou nově pořádány pod hlavičkou našeho nového projektu Bav se sportem. Veškeré infomace najdeš zde."
+  - Admin rozhraní a migrace se ruší/odkládá.
 
 ### 5. Click Tracking - GDPR
 - [x] **Implementovat anonymizaci IP adres** - ✅ HOTOVO

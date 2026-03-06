@@ -101,9 +101,14 @@ body {
 
 
 .container-kontakt .text {
-
     width: 60%;
+    margin-top: 150px; /* Added top margin to prevent collision with header */
+}
 
+@media screen and (max-width: 930px) {
+    .container-kontakt .text {
+        margin-top: 50px; /* Smaller margin for mobile as layout changes */
+    }
 }
 
 

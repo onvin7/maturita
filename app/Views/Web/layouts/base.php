@@ -123,32 +123,10 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
     <?php
-        $metaPixelId = \App\Helpers\TrackingHelper::getMetaPixelId();
         $trackingEnabled = \App\Helpers\TrackingHelper::isTrackingEnabled();
 
-        if ($trackingEnabled && $metaPixelId && $metaPixelId !== 'YOUR_META_PIXEL_ID'):
-    ?>
-    <!-- Meta Pixel Code -->
-    <script>
-    !function(f,b,e,v,n,t,s)
-    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-    n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];
-    s.parentNode.insertBefore(t,s)}(window, document,'script',
-    'https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', '<?= htmlspecialchars($metaPixelId, ENT_QUOTES, 'UTF-8'); ?>');
-    fbq('track', 'PageView');
-    </script>
-    <noscript><img height="1" width="1" style="display:none"
-    src="https://www.facebook.com/tr?id=<?= rawurlencode($metaPixelId); ?>&ev=PageView&noscript=1"
-    /></noscript>
-    <!-- End Meta Pixel Code -->
-    <?php endif; ?>
-
-    <?php
         if ($trackingEnabled) {
+            echo \App\Helpers\TrackingHelper::generateMetaPixel();
             echo \App\Helpers\TrackingHelper::generateGoogleAnalytics();
         }
     ?>
@@ -212,6 +190,7 @@
     <link rel="stylesheet" href="/css/navbar-web.css">
     <link rel="stylesheet" href="/css/footer.css">
     <link rel="stylesheet" href="/css/breadcrumbs.css">
+    <link rel="stylesheet" href="/css/cookie-consent.css">
 
     <?php if (isset($css) && is_array($css)): ?>
         <?php foreach ($css as $i): ?>
@@ -271,6 +250,21 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script async type="application/javascript" src="https://news.google.com/swg/js/v1/swg-basic.js"></script>
+
+
+    <!-- Cookie Consent Banner -->
+    <div id="cookie-consent-banner" class="cookie-consent-banner">
+        <div class="cookie-consent-content">
+            <div class="cookie-consent-text">
+                <p>Tento web používá soubory cookie a sledovací technologie (např. Meta Pixel, Google Analytics), abychom vám mohli nabídnout ten nejlepší zážitek. Kliknutím na „Souhlasím“ nám dáváte svolení k jejich použití. <a href="/ochrana-osobnich-udaju">Více informací</a>.</p>
+            </div>
+            <div class="cookie-consent-buttons">
+                <button id="cookie-accept" class="cookie-btn cookie-btn-accept">Souhlasím</button>
+                <button id="cookie-decline" class="cookie-btn cookie-btn-decline">Odmítnout</button>
+            </div>
+        </div>
+    </div>
+    <script src="/js/cookie-consent.js"></script>
 
 </body>
 

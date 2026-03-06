@@ -19,9 +19,8 @@ Seřazeno logicky od vývoje funkcí, přes nastavení, až po finální migraci
 - [ ] **Testování** (Upload, zobrazení v článku, výchozí reklama)
 
 ### 3. Events Systém (Závody)
-- [ ] **Admin rozhraní** (CRUD pro správu závodů)
-- [ ] **Frontend** (Upravit šablony, aby četly z DB místo PHP souborů)
-- [ ] *Pozn: Migrace dat závodů proběhne až ve fázi 4.*
+- [x] **Frontend** (Zobrazit informaci o přesunu závodů na projekt "Bav se sportem") - ✅ HOTOVO
+- [x] **Admin/Migrace** (Zrušeno)
 
 ### 4. GDPR & Soukromí (Legislativa)
 - [ ] **Cookie Consent Banner** (Lišta se souhlasem, blokování Pixel/GA skriptů bez souhlasu)

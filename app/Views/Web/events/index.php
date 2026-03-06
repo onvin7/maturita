@@ -4,6 +4,16 @@
 </div>
 
 <div class="events-container">
+    
+    <div class="events-info-banner" style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 40px; border-radius: 12px; margin-bottom: 50px; text-align: center; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+        <i class="fas fa-info-circle" style="font-size: 48px; color: #e30613; margin-bottom: 20px;"></i>
+        <h3 style="color: #fff; font-size: 24px; margin-bottom: 15px; font-family: 'Fira Sans Condensed', sans-serif;">Důležité oznámení</h3>
+        <p style="color: #ccc; font-size: 18px; line-height: 1.6; max-width: 800px; margin: 0 auto;">
+            Naše závody jsou nově pořádány pod hlavičkou našeho nového projektu <strong>Bav se sportem</strong>. 
+            Veškeré infomace najdeš <a href="#" style="color: #e30613; text-decoration: underline; font-weight: bold;">zde</a>.
+        </p>
+    </div>
+
     <?php
     // Struktura závodů podle roku
     // Každý rok má jednotlivé závody a jeden seriál závodů

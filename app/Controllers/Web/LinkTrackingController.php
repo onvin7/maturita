@@ -48,6 +48,14 @@ class LinkTrackingController
         // Zaznamenání kliku (agregovaný počet)
         $linkClickId = $this->linkClickModel->recordClick($articleId, $url, $linkText);
 
+        // Check for cookie consent
+        $cookieConsent = $_COOKIE['cookie_consent_status'] ?? null;
+        // Pokud není cookie nastavena, předpokládáme nesouhlas (opt-in)
+        $isTrackingAllowed = ($cookieConsent === 'granted');
+
+        // Vždy sbíráme alespoň základní technické údaje pro účely bezpečnosti a statistiky, 
+        // ale pro nesouhlasící uživatele je výrazně omezíme nebo anonymizujeme
+        
         // Sběr detailních informací o kliku
         $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? null;
         $ipAddress = UserAgentHelper::getClientIP();
@@ -69,7 +77,7 @@ class LinkTrackingController
         // Geolokace (asynchronně, aby nezpomalovala redirect)
         // POZNÁMKA: Používáme původní IP pro geolokaci, anonymizujeme až před uložením
         $geoData = null;
-        if ($ipAddress && $deviceType !== 'bot') {
+        if ($isTrackingAllowed && $ipAddress && $deviceType !== 'bot') {
             // Použijeme rychlé volání, ale s timeoutem
             $geoData = GeoLocationHelper::getLocationFromIP($ipAddress);
         }
@@ -81,12 +89,20 @@ class LinkTrackingController
         $viewportHeight = isset($_GET['vh']) ? (int)$_GET['vh'] : null;
 
         // Anonymizace IP adresy pro GDPR kompatibilitu (před uložením do DB)
-        $anonymizedIP = IPAnonymizerHelper::anonymizeIP($ipAddress);
+        // Pokud není souhlas, provedeme silnější anonymizaci nebo ji neuložíme vůbec
+        if ($isTrackingAllowed) {
+            $anonymizedIP = IPAnonymizerHelper::anonymizeIP($ipAddress);
+        } else {
+            // Bez souhlasu neukládáme IP ani v anonymizované podobě pro tracking
+            $anonymizedIP = null; 
+            // Bez souhlasu neukládáme Session ID pro tracking
+            $sessionId = null;
+        }
 
         // Příprava dat pro event
         $eventData = [
             'ip_address' => $anonymizedIP,
-            'user_agent' => $userAgent,
+            'user_agent' => $userAgent, // User Agent je technický údaj nutný pro zobrazení, ale může být sporný. Pro statistiky "Mobile vs Desktop" je klíčový.
             'referrer' => $referrer,
             'session_id' => $sessionId,
             'device_type' => $deviceType,

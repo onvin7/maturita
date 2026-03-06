@@ -20,7 +20,7 @@ class TrackingHelper
 
         return "
 <!-- Meta Pixel Code -->
-<script>
+<script type=\"text/plain\" data-cookie-consent=\"tracking\">
 !function(f,b,e,v,n,t,s)
 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -32,9 +32,6 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
 fbq('init', '{$pixelId}');
 fbq('track', 'PageView');
 </script>
-<noscript><img height=\"1\" width=\"1\" style=\"display:none\"
-src=\"https://www.facebook.com/tr?id={$pixelId}&ev=PageView&noscript=1\"
-/></noscript>
 <!-- End Meta Pixel Code -->";
     }
 
@@ -54,8 +51,8 @@ src=\"https://www.facebook.com/tr?id={$pixelId}&ev=PageView&noscript=1\"
 
         return "
 <!-- Google Analytics -->
-<script async src=\"https://www.googletagmanager.com/gtag/js?id={$gaId}\"></script>
-<script>
+<script type=\"text/plain\" data-cookie-consent=\"tracking\" async src=\"https://www.googletagmanager.com/gtag/js?id={$gaId}\"></script>
+<script type=\"text/plain\" data-cookie-consent=\"tracking\">
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
@@ -77,7 +74,7 @@ src=\"https://www.facebook.com/tr?id={$pixelId}&ev=PageView&noscript=1\"
         }
 
         $paramsJson = json_encode($parameters);
-        return "<script>fbq('track', '{$eventName}', {$paramsJson});</script>";
+        return "<script type=\"text/plain\" data-cookie-consent=\"tracking\">fbq('track', '{$eventName}', {$paramsJson});</script>";
     }
 
     /**
@@ -93,7 +90,7 @@ src=\"https://www.facebook.com/tr?id={$pixelId}&ev=PageView&noscript=1\"
         }
 
         $paramsJson = json_encode($parameters);
-        return "<script>gtag('event', '{$eventName}', {$paramsJson});</script>";
+        return "<script type=\"text/plain\" data-cookie-consent=\"tracking\">gtag('event', '{$eventName}', {$paramsJson});</script>";
     }
 
     /**
