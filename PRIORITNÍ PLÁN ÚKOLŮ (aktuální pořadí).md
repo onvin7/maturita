@@ -26,8 +26,10 @@ PRIORITNÍ PLÁN ÚKOLŮ (aktuální pořadí)
 5) Ads management (reklamy)
 - [ ] Doplnit chybějící komponenty (model, controller, views, upload validace, frekvence, fallback)
 - [ ] Odkomentovat položku “Reklamy” v admin navbaru po dokončení
-- [ ] Přidat přepínač pro Google Ads kód (v adminu, zobrazení v článcích)
 - [ ] Ošetřit mazání (soubor + DB), access control
+- [ ] **Reklamy v článcích:** Implementovat vkládání bannerů/kódů do textu článků (jako na starém webu)
+- [ ] **Celoplošné reklamy:** Připravit systém pro globální reklamy (header, sidebar, footer, popup) - konzultovat s Dominikem
+- [ ] Přidat přepínač pro Google Ads kód (v adminu, zobrazení v článcích)
 
 6) Migrace databáze – dokončení a validace
 - [ ] Spustit kroky 1–10 v web/migrate_db.php postupně s limity

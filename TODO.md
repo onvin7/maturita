@@ -253,6 +253,8 @@
 - [ ] **Access Control** - Zkontrolovat, zda je potřeba přidat správu reklam do Access Control
 - [ ] **DB migrace** - Vytvořit SQL migrační skript pro vytvoření tabulky `reklamy` (pro produkční nasazení)
 - [ ] **Test mazání** - Otestovat, že se při mazání reklamy smaže i obrázek z disku
+- [ ] **Reklamy v článcích** - Bannery/kódy vkládané přímo do obsahu článků (jako na starém webu)
+- [ ] **Celoplošné reklamy** - Systém pro globální reklamy (header, footer, atd.) - NUTNÁ KONZULTACE S DOMINIKEM
 - [ ] **Google Ads v článcích** - Místo cycle banneru dát Google Ads, ideálně v adminu nastavení
   - Přidat možnost vložit Google Ads kód místo banneru
   - Nastavení v admin panelu pro přepínání mezi bannery a Google Ads

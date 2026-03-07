@@ -54,6 +54,14 @@ class AuthMiddleware
         $uri = str_replace('/admin/', '', $_SERVER['REQUEST_URI']);
         $uri = strtok($uri, '?'); // Odstranění GET parametrů
         $uri = trim($uri, '/');
+        
+        // ✅ **Odstranění ID z konce URL (např. articles/preview/1083 -> articles/preview)**
+        // Pokud je poslední část URI číslo, odstraníme ji, aby se práva vztahovala na obecnou sekci
+        $parts = explode('/', $uri);
+        if (count($parts) > 1 && is_numeric(end($parts))) {
+            array_pop($parts);
+            $uri = implode('/', $parts);
+        }
 
         // ✅ **Debug: Výpis aktuální URL**
         error_log("DEBUG: Přístup na URI: " . $uri);
@@ -78,13 +86,25 @@ class AuthMiddleware
         // ✅ **Debug: Výpis oprávnění ke stránce**
         error_log("DEBUG: Oprávnění k '$uri': " . print_r($pagePermissions, true));
 
-        // ✅ **Pokud stránka není v databázi, přístup je zakázán**
+        // ✅ **Pokud stránka není v databázi, automaticky ji přidej**
         if (!$pagePermissions) {
-            @LogHelper::write('security.log', 'Page access denied - User ID: ' . ($_SESSION['user_id'] ?? 'unknown') . ', Role: ' . $currentRole . ', URI: ' . $uri . ' - IP: ' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
-            $error_message = "Stránka nenalezena nebo nemáte oprávnění k přístupu.";
-            $view = '../app/Views/Admin/layout/access_denied.php';
-            include '../app/Views/Admin/layout/base.php';
-            exit();
+            // Přidáme stránku do DB s výchozím nastavením (zakázáno pro role 1 a 2)
+            // Nezáleží na tom, kdo stránku otevřel (admin nebo jiná role) - vždy se přidá
+            $accessControl->addPage($uri, 0, 0);
+            
+            // Zalogujeme vytvoření nové stránky
+            @LogHelper::write('access_control.log', 'New page auto-registered: ' . $uri . ' by User ID: ' . ($_SESSION['user_id'] ?? 'unknown'));
+            
+            // Pokud je to admin (role 3), pustíme ho dál (má přístup ke všemu)
+            if ($currentRole === 3) {
+                return;
+            }
+            
+            // Pokud je to jiná role (1 nebo 2), musíme znovu načíst oprávnění z DB
+            // (která jsme právě vytvořili jako 0, 0)
+            $pagePermissions = $accessControl->getPagePermissions($uri);
+            
+            // Logika níže (řádky 91+) pak uživatele správně vyhodí, protože oprávnění jsou 0
         }
 
         // ✅ **Ověření přístupů podle role**

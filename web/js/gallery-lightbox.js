@@ -119,51 +119,67 @@ document.addEventListener('DOMContentLoaded', function() {
             // CSS Gallery Grid:
             // data-count="1": 1 slot
             // data-count="2": 2 sloty
-            // data-count="3": 2 sloty (1+1, 3. skrytý)
-            // data-count="4": 3 sloty (1+2, 4. skrytý)
-            // data-count="5+": 5 slotů (2+3, 6+. skryté)
-            
-            let visibleSlots = count;
-            if (count === 3) visibleSlots = 2;
-            else if (count === 4) visibleSlots = 3;
-            else if (count >= 5) visibleSlots = 5;
-            
-            // Pokud je fotek víc než viditelných slotů, dáme overlay na poslední viditelný slot
-            if (count > visibleSlots) {
-                overlayIndex = visibleSlots - 1;
-            }
+            // data-count="3": 2 sloty vidět + 3. s overlayem "+1" (1 nahoře, 2 dole)
+             // data-count="4": 3 sloty vidět + 4. s overlayem "+1" (1 nahoře, 3 dole)
+             // data-count="5+": 4 sloty vidět + 5. s overlayem (1 nahoře, 3 dole)
+             
+             let visibleSlots = count;
+             
+             // KDYŽ 3 FOTKY: Vidím 2 + 1 (overlay)
+             // Layout 1+2. Zobrazí se 1 velká + 1 malá. Na té druhé malé (třetí celkem) bude overlay.
+             // Vlastně ne, layout je 1+2. Chceme vidět 2 sloty (1 velký, 1 malý) a na tom druhém malém overlay?
+             // "dole jedna visible a druha bude +1 overlay" -> Tzn. celkem 3 sloty, na posledním overlay.
+             // Takže visibleSlots = 3, ale na posledním (index 2) overlay.
+             // Overlay logika: if (index === overlayIndex). overlayIndex = visibleSlots - 1.
+             // Pokud count = 3 a visibleSlots = 3, overlayIndex = 2.
+             // Ale podmínka pro overlay je `if (count > visibleSlots)`.
+             // Aby se overlay zobrazil i když se vejdou, musíme změnit podmínku.
+             
+             // NOVÁ LOGIKA:
+             // 3 fotky: visibleSlots = 2. (Vidím 2 fotky). Overlay na 2. fotce? Ne.
+             // "dole jedna visible a druha bude +1 overlay".
+             // To znamená: Layout má 3 pozice. 1. (velká) je vidět. 2. (malá) je vidět. 3. (malá) má overlay.
+             // Overlay říká "+1" (zbývá 1 fotka, ta pod overlayem).
+             // Takže count = 3. visibleSlots = 2? Ne.
+             // Potřebujeme, aby JS vyrenderoval 3 sloty. Ale na tom 3. byl overlay.
+             
+             // Upravíme logiku overlaye.
+             // Chceme overlay VŽDY na posledním slotu layoutu, pokud je fotek >= 3.
+             
+             let forceOverlay = false;
+             
+             if (count === 3) {
+                 // Layout 1+2. Chceme overlay na 3. pozici.
+                 visibleSlots = 3; 
+                 forceOverlay = true;
+             } else if (count === 4) {
+                 // Layout 1+3. Chceme overlay na 4. pozici.
+                 visibleSlots = 4;
+                 forceOverlay = true;
+             } else if (count >= 5) {
+                 // Layout 1+3. Chceme overlay na 4. pozici.
+                 visibleSlots = 4;
+                 // Tady je to standardní chování (count > visibleSlots), overlay se zobrazí sám.
+             }
+             
+             // Pokud je fotek víc než viditelných slotů NEBO forceOverlay, dáme overlay na poslední viditelný slot
+             if (count > visibleSlots || forceOverlay) {
+                 overlayIndex = visibleSlots - 1;
+             }
             
             if (index === overlayIndex) {
-                const remaining = count - visibleSlots; // Kolik jich zbývá NEZOBRAZENÝCH
-                // Pokud remaining > 0, zobrazíme +X.
-                // Pokud remaining == 0 (všechny se vešly), nezobrazujeme nic?
-                // Ale logika výše (count > visibleSlots) už to řeší.
+                // Calculate remaining count
+                // Pokud forceOverlay (pro 3 a 4 fotky), tak zbývá 1 (ta pod overlayem)
+                // Pokud standardní (5+), tak count - visibleSlots + 1 (ta pod overlayem se počítá taky)
+                let remaining = count - visibleSlots + 1;
                 
-                // ALE: U 5 fotek je visibleSlots=5. count=5. count > visibleSlots je false. Žádný overlay. Správně.
-                // U 6 fotek je visibleSlots=5. count=6. count > visibleSlots je true. Overlay na indexu 4. "+1". Správně.
-                
-                // Co když chce overlay i pro 3 fotky, pokud jich je tam třeba 10?
-                // CSS pro 10 fotek použije layout "5 a více", takže visibleSlots=5.
-                // Takže u 10 fotek bude overlay na 5. fotce s textem "+5".
-                
-                // Co když mám 4 fotky a layout pro 4? visibleSlots=4. count=4. Žádný overlay.
-                
-                // Zkusme interpretovat "aby vzdy bylo videt ze je to galerie".
-                // Možná chce overlay i u poslední fotky, i když žádné další nejsou? Ne, to by bylo "+0".
-                
-                // Jdeme na jistotu: Overlay jen pro skryté fotky.
+                // Specifická úprava pro "forceOverlay" případy (3 a 4 fotky), kde chceme zobrazit "+1"
+                // V těchto případech visibleSlots == count, takže výpočet nahoře by dal 1.
+                // Což je správně: "+1".
                 
                 const overlay = document.createElement('div');
                 overlay.className = 'gallery-overlay';
-                overlay.textContent = '+' + (remaining + 1); // +1 protože tento slot je taky "překrytý" a slouží jako tlačítko
-                
-                // Overlay click handler
-                overlay.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    openLightbox(images, index);
-                });
-                
+                overlay.innerHTML = `<span>+${remaining}</span>`;
                 wrapper.appendChild(overlay);
             }
         });
