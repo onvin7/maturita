@@ -17,9 +17,10 @@ PRIORITNÍ PLÁN ÚKOLŮ (aktuální pořadí)
 - [ ] Základní monitoring indexace (1–2 týdny), řešení chyb v SC
 
 4) Events systém (závody) – administrace + data
+- [x] Upravit veřejné view sekce Events (rozdělení na Bav se sportem a Archiv)
+- [x] Migrovat existující závody (cyklistickey/bezeckey) do DB
+- [x] Upravit veřejné view, aby četlo data z DB (ne static PHP)
 - [ ] Připravit admin CRUD pro závody (model, controller, views, routes)
-- [ ] Migrovat existující závody (cyklistickey/bezeckey) do DB
-- [ ] Upravit veřejné view, aby četlo data z DB (ne static PHP)
 - [ ] Volitelně odstranit staré race soubory po migraci
 
 5) Ads management (reklamy)
@@ -38,6 +39,7 @@ PRIORITNÍ PLÁN ÚKOLŮ (aktuální pořadí)
 - [ ] Validovat tokeny v kontrolerech u POST metod
 
 8) Editor článků – vylepšení
+- [x] Možnost přidat zdroj (autor/web) k obrázkům a galeriím
 - [ ] LanguageTool API integrace (pokročilá gramatika volitelně)
 - [ ] Frontend CSS pro galerie obrázků (2–4 vedle sebe) i mimo editor
 - [ ] Volba “Otevřít odkaz v novém okně” s target="_blank" + rel="noopener"

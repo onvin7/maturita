@@ -275,6 +275,7 @@
 ### 4. Events systém (závody)
 - [x] **Upravit sekci Závody** - ✅ HOTOVO
   - Zobrazit informaci: "Naše závody jsou nově pořádány pod hlavičkou našeho nového projektu Bav se sportem. Veškeré infomace najdeš zde."
+  - Rozdělení na Hero sekci (Bav se sportem) a Archiv závodů (historie)
   - Admin rozhraní a migrace se ruší/odkládá.
 
 ### 5. Click Tracking - GDPR
@@ -318,6 +319,7 @@
   - Aktualizovat text, informace o redakci, atd.
 
 ### 9. Editor článků - formátování
+- [x] **Zdroj obrázků** - Přidat možnost uvést zdroj/autora fotky (vypíše se pod obrázkem)
 - [ ] **Nadpisy 2x, Text** - Upravit editor, aby podporoval správné formátování nadpisů a textu
   - Možná jde o podporu H2 nadpisů a textu v editoru
   - Zkontrolovat TinyMCE konfiguraci

@@ -223,6 +223,90 @@
     box-shadow: none;
 }
 
+/* HERO SECTION - BAV SE SPORTEM (Added New) */
+.events-hero {
+    height: auto;
+    min-height: 40vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    margin-bottom: 50px;
+    margin-top: 0;
+    padding-top: 50px;
+}
+
+.events-hero-content {
+    max-width: 800px;
+    padding: 0 20px;
+    animation: fadeIn 1s ease-out;
+    margin-top: 5vh;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-subtitle {
+    color: #ccc;
+    font-size: 24px;
+    font-weight: 300;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.hero-text {
+    color: #999;
+    font-size: 22px;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    font-weight: 300;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-subtitle .highlight {
+    color: #f1008d;
+    font-weight: 600;
+}
+
+.btn-hero {
+    display: inline-flex;
+    align-items: center;
+    gap: 15px;
+    padding: 18px 45px;
+    background: transparent;
+    color: #f1008d;
+    text-decoration: none;
+    border: 2px solid #f1008d;
+    border-radius: 50px;
+    font-weight: 500;
+    font-size: 18px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    transition: all 0.3s ease;
+}
+
+.btn-hero:hover {
+    background: #f1008d;
+    color: white;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(241, 0, 141, 0.3);
+}
+
+.btn-hero i {
+    transition: transform 0.3s ease;
+}
+
+.btn-hero:hover i {
+    transform: translateX(5px);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .events-container {
@@ -257,6 +341,35 @@
     .year-section {
         margin-bottom: 60px;
     }
+
+    /* Hero Responsive */
+    .events-hero {
+        min-height: auto;
+        padding-top: 30px;
+        margin-bottom: 30px;
+    }
+
+    .events-hero-content {
+        margin-top: 2vh;
+        padding: 0 10px;
+    }
+
+    .hero-subtitle {
+        font-size: 18px;
+        margin-bottom: 15px;
+    }
+
+    .hero-text {
+        font-size: 16px;
+        margin-bottom: 20px;
+    }
+
+    .btn-hero {
+        padding: 12px 25px;
+        font-size: 15px;
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 @media (max-width: 480px) {
@@ -284,5 +397,8 @@
         padding: 10px 20px;
         font-size: 14px;
     }
+    
+    .hero-title {
+        font-size: 32px;
+    }
 }
-
