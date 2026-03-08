@@ -16,27 +16,43 @@ class LinkTrackingHelper
         // Uložíme originální HTML pro fallback
         $originalHtml = $html;
 
-        // Použijeme DOMDocument pro lepší manipulaci s HTML
-        $dom = new \DOMDocument();
-        
-        // Potlačíme chyby při parsování HTML
-        libxml_use_internal_errors(true);
-        
-        // Načteme HTML s UTF-8 encoding
-        // Přidáme wrapper pro správné parsování
-        $html = mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8');
-        $wrappedHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body>' . $html . '</body></html>';
-        @$dom->loadHTML($wrappedHtml, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-        
-        // Vymažeme chyby
-        libxml_clear_errors();
+        try {
+            // Použijeme DOMDocument pro lepší manipulaci s HTML
+            $dom = new \DOMDocument();
+            
+            // Potlačíme chyby při parsování HTML
+            libxml_use_internal_errors(true);
+            
+            // Načteme HTML s UTF-8 encoding
+            // Přidáme wrapper pro správné parsování a detekci kódování
+            // Použijeme mb_convert_encoding pouze pokud je k dispozici
+            if (function_exists('mb_convert_encoding')) {
+                $html = mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8');
+            }
+            
+            // Přidáme meta tag pro vynucení UTF-8, aby DOMDocument neblbnul s češtinou
+            $wrappedHtml = '<!DOCTYPE html><html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>' . $html . '</body></html>';
+            
+            // Načtení HTML s ošetřením chyb
+            $loaded = @$dom->loadHTML($wrappedHtml, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+            
+            if (!$loaded) {
+                throw new \Exception("Failed to load HTML into DOMDocument");
+            }
+            
+            // Vymažeme chyby libxml
+            libxml_clear_errors();
 
-        $xpath = new \DOMXPath($dom);
-        $allLinks = $xpath->query('//a[@href]');
-        
-        // Najdeme všechny externí odkazy a jejich pozice
-        $externalLinks = [];
-        $linkIndex = 0;
+            $xpath = new \DOMXPath($dom);
+            $allLinks = $xpath->query('//a[@href]');
+            
+            if ($allLinks === false) {
+                 return $originalHtml; // Pokud XPath selže, vrátíme originál
+            }
+
+            // Najdeme všechny externí odkazy a jejich pozice
+            $externalLinks = [];
+            $linkIndex = 0;
         
         foreach ($allLinks as $link) {
             $href = $link->getAttribute('href');
@@ -136,18 +152,24 @@ class LinkTrackingHelper
             }
         }
 
-        // Vrátíme upravené HTML
-        $body = $dom->getElementsByTagName('body')->item(0);
-        if ($body) {
-            $html = '';
-            foreach ($body->childNodes as $node) {
-                $html .= $dom->saveHTML($node);
+            // Vrátíme upravené HTML
+            $body = $dom->getElementsByTagName('body')->item(0);
+            if ($body) {
+                $newHtml = '';
+                foreach ($body->childNodes as $node) {
+                    $newHtml .= $dom->saveHTML($node);
+                }
+                return $newHtml;
             }
-            return $html;
-        }
+            
+            return $originalHtml;
 
-        // Fallback - pokud se nepodařilo parsovat, vrátíme původní HTML
-        return $originalHtml;
+        } catch (\Exception $e) {
+            // Logování chyby (volitelné, pokud existuje logger)
+            error_log("LinkTrackingHelper Error: " . $e->getMessage());
+            // V případě jakékoliv chyby vrátíme původní HTML, aby se obsah zobrazil
+            return $originalHtml;
+        }
     }
 }
 

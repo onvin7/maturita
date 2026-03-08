@@ -39,6 +39,17 @@ class LoginController
     // Přihlášení uživatele
     public function login($email, $password)
     {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        // CSRF kontrola pro login
+        if (!\App\Helpers\CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
+            $_SESSION['login_error'] = 'Neplatný bezpečnostní token (CSRF). Zkuste to prosím znovu.';
+            header('Location: /login');
+            exit();
+        }
+
         // LOGIN LOG - speciální log soubor pro login
         $loginLogFile = dirname(dirname(dirname(__DIR__))) . '/logs/login.log';
         $logDir = dirname($loginLogFile);

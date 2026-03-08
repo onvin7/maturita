@@ -7,6 +7,7 @@
         </div>
     </div>
     <form action="/admin/settings/update" method="POST" enctype="multipart/form-data">
+        <?= \App\Helpers\CsrfHelper::formInput() ?>
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card mb-3">

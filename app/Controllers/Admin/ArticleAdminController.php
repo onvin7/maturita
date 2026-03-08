@@ -6,6 +6,7 @@ use App\Models\Article;
 use App\Models\Category;
 use App\Helpers\TextHelper;
 use App\Helpers\LogHelper;
+use App\Helpers\CsrfHelper;
 
 use function imagecreatefromjpeg;
 use function imagecreatefrompng;
@@ -51,6 +52,11 @@ class ArticleAdminController
     // Ukládání nového článku
     public function store($postData)
     {
+        // CSRF kontrola
+        if (!CsrfHelper::verify($postData['csrf_token'] ?? '')) {
+            die("Chyba: Neplatný bezpečnostní token (CSRF). Zkuste formulář odeslat znovu.");
+        }
+
         if (empty($postData['nazev'])) {
             // echo "Název článku je povinný.";
             return;
@@ -216,6 +222,11 @@ class ArticleAdminController
     // Aktualizace článku
     public function update($id, $postData)
     {
+        // CSRF kontrola
+        if (!CsrfHelper::verify($postData['csrf_token'] ?? '')) {
+            die("Chyba: Neplatný bezpečnostní token (CSRF). Zkuste formulář odeslat znovu.");
+        }
+
         if (empty($postData['nazev'])) {
             // echo "Název článku je povinný.";
             return;

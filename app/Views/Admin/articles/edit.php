@@ -4,6 +4,7 @@
     </div>
     
     <form action="/admin/articles/update/<?= htmlspecialchars($article['id']) ?>" method="POST" enctype="multipart/form-data">
+        <?= \App\Helpers\CsrfHelper::formInput() ?>
         <input type="hidden" class="form-control" id="id" name="id" value="<?= htmlspecialchars($article['id']) ?>" required>
         
         <div class="row">

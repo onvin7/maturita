@@ -25,8 +25,8 @@ use App\Helpers\CSRFHelper;
                         <?php unset($_SESSION['success']); ?>
                     <?php endif; ?>
                     <form action="<?= isset($user) ? '/admin/users/update/' . htmlspecialchars($user['id']) : '/admin/users/store' ?>" method="POST">
-                        <input type="hidden" name="csrf_token" value="<?= CSRFHelper::generateToken(); ?>">
-                        <div class="mb-3">
+        <?= \App\Helpers\CsrfHelper::formInput() ?>
+        <div class="mb-3">
                             <label for="email" class="form-label"><i class="fas fa-envelope me-2"></i>E-mail</label>
                             <input type="email" class="form-control" id="email" name="email" value="<?= htmlspecialchars($user['email'] ?? '') ?>" required>
                         </div>

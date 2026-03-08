@@ -5,42 +5,19 @@ namespace App\Controllers\Admin;
 use App\Models\Category;
 use App\Helpers\LogHelper;
 
+use App\Helpers\CsrfHelper; // Přidáno
+
 class CategoryAdminController
 {
-    private $model;
-
-    public function __construct($db)
-    {
-        $this->model = new Category($db);
-    }
-
-    public function index()
-    {
-        $sortBy = $_GET['sort_by'] ?? 'id';      // Výchozí řazení podle ID
-        $order = $_GET['order'] ?? 'ASC';       // Výchozí vzestupné řazení
-        $filter = $_GET['filter'] ?? '';        // Výchozí bez filtru
-
-        // Načtení kategorií s filtrováním a řazením
-        $categories = $this->model->getAllWithSortingAndFiltering($sortBy, $order, $filter);
-
-        $adminTitle = "Kategorie | Admin Panel - Cyklistickey magazín";
-
-        // Zobrazení view
-        $view = '../app/Views/Admin/categories/index.php';
-        include '../app/Views/Admin/layout/base.php';
-    }
-
-
-    public function create()
-    {
-        $adminTitle = "Vytvořit kategorii | Admin Panel - Cyklistickey magazín";
-        
-        $view = '../app/Views/Admin/categories/create.php';
-        include '../app/Views/Admin/layout/base.php';
-    }
+    // ...
 
     public function store($postData)
     {
+        // CSRF kontrola
+        if (!CsrfHelper::verify($postData['csrf_token'] ?? '')) {
+            die("Chyba: Neplatný bezpečnostní token (CSRF). Zkuste formulář odeslat znovu.");
+        }
+
         if (empty($postData['nazev_kategorie'])) {
             echo "Název kategorie je povinný.";
             return;
@@ -79,6 +56,11 @@ class CategoryAdminController
 
     public function update($id, $postData)
     {
+        // CSRF kontrola
+        if (!CsrfHelper::verify($postData['csrf_token'] ?? '')) {
+            die("Chyba: Neplatný bezpečnostní token (CSRF). Zkuste formulář odeslat znovu.");
+        }
+
         if (empty($postData['nazev_kategorie'])) {
             echo "Název kategorie je povinný.";
             return;

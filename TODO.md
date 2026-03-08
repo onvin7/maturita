@@ -28,12 +28,12 @@
 - **Soubor:** `web/migrate_db.php` (existuje, ale potřebuje dokončit/testovat)
 
 ### 2. Přesměrování starých URL (301) - Opravit staré odkazy/kolínky
-- [x] **Implementovat 301 redirecty pro staré URL (kolínky)** - ✅ HOTOVO
+- [x] **Implementovat 301 redirecty pro staré URL (kolínky)** - ✅ HOTOVO (Nutná kontrola)
   - Opravit staré odkazy/kolínky, aby se přesměrovávaly na novou strukturu
   - Zachovat SEO hodnotu starých odkazů z Google
   - Zachovat funkčnost starých sdílených odkazů
   - Mapovat staré URL na nové struktury
-- [x] **Přidat redirecty do PHP routing** - ✅ HOTOVO
+- [x] **Přidat redirecty do PHP routing** - ✅ HOTOVO (Nutná kontrola)
   - Staré URL struktury → nové URL struktury (/race → /events)
   - Všechny důležité stránky mají správný routing
   - RedirectHelper vytvořen v `app/Helpers/RedirectHelper.php`
@@ -108,14 +108,14 @@
 - **Poznámka:** Uživatel potvrdil, že je hotovo. Kategorie "Nevybráno" (id: 6, url: 'nevybrano') by již neměla existovat v databázi
 
 ### 11. Počítání prokliků v článku
-- [x] **Click tracking systém** - ✅ HOTOVO
+- [x] **Click tracking systém** - ✅ HOTOVO (Nutná kontrola)
   - Controller: `app/Controllers/Web/LinkTrackingController.php`
   - Model: `app/Models/LinkClickEvent.php`
   - Helper: `app/Helpers/LinkTrackingHelper.php`
   - Tabulka: `link_click_events` (detailní tracking)
   - Tabulka: `link_clicks` (agregované statistiky)
   - Admin rozhraní: `app/Controllers/Admin/LinkClicksAdminController.php`
-- [x] **Zjištění, na co lidi opravdu klikají** - ✅ HOTOVO
+- [x] **Zjištění, na co lidi opravdu klikají** - ✅ HOTOVO (Nutná kontrola)
   - Sledování všech kliků na odkazy v článcích
   - Detailní metriky (IP, User Agent, Geolokace, čas, scroll, atd.)
 - **Návrhy na vylepšení (volitelné):**
@@ -137,7 +137,7 @@
 - **Soubor:** `web/js/tinymce-config.js` (základní kontrola je implementována)
 
 ### 13. Kompletní SEO (titles, popisky, AI modely, helm modely, indexace Google)
-- [x] **Základní SEO implementace** - ✅ HOTOVO
+- [x] **Základní SEO implementace** - ✅ HOTOVO (Nutná kontrola)
   - SEOHelper: `app/Helpers/SEOHelper.php`
   - Structured Data pro všechny typy stránek
   - Open Graph a Twitter Cards
@@ -156,11 +156,27 @@
   - AISEOHelper je volitelně používán v SEOHelper (pokud existuje)
   - **Chybí:** Aktivní použití AISEOHelper ve všech kontrolerech pro optimalizaci
   - **Chybí:** Plná integrace pro všechny AI modely
-- [x] **Helm modely (HTML head)** - ✅ HOTOVO
+- [x] **Helm modely (HTML head)** - ✅ HOTOVO (Nutná kontrola)
   - Kompletní SEO meta tagy v `app/Views/Web/layouts/base.php`
   - SEO pro všechny helm modely, aby to šlo najít co nejlíp
 
-### 14. Integrace Meta Pixelu a SEO (jako v realitách)
+### 14. Ochrana & Soukromí (CSRF, GDPR, Config)
+- [x] **CSRF Ochrana** - ✅ HOTOVO
+  - Implementován `CsrfHelper` s metodami `generate`, `verify`, `formInput`
+  - Ochrana přidána do `BaseAdminController` a specifických kontrolerů (Article, Category, User, Login)
+  - Formuláře v adminu (create/edit) obsahují skrytý input s tokenem
+- [x] **Bezpečná konfigurace** - ✅ HOTOVO
+  - Vytvořen `config/db_credentials.php` (přidán do .gitignore)
+  - Hesla odstraněna z `config/db.php` a `web/migrate_db.php`
+  - Použití konstant pro připojení k DB
+- [x] **GDPR Cookie Banner & Gating** - ✅ HOTOVO
+  - Implementován `web/js/cookie-consent.js` pro správu souhlasů
+  - Banner přidán do `app/Views/Web/layouts/base.php`
+  - Tracking skripty (Pixel, GA) v `TrackingHelper` upraveny na `type="text/plain"`
+  - Skripty se spouští až po udělení souhlasu
+  - Respektuje preference uživatele (localStorage)
+
+### 15. Integrace Meta Pixelu a SEO (jako v realitách)
 - [x] **Meta Pixel (Facebook Pixel) tracking** - ✅ HOTOVO
   - Meta Pixel ID nastaveno v `web/config/seo_config.json` (1295970118998945)
   - Meta Pixel kód vložen do `app/Views/Web/layouts/base.php` (řádek 121-139)
@@ -347,16 +363,16 @@
     - HTML obsah editoru se normalizuje před porovnáním pro lepší detekci změn
 
 ### 10. Sociální sítě
-- [x] **Soc site - jaký??** - Rozhodnout, které sociální sítě integrovat - ✅ HOTOVO
+- [x] **Soc site - jaký??** - Rozhodnout, které sociální sítě integrovat - ✅ HOTOVO (Nutná kontrola)
   - Instagram, Strava, Twitter/X, LinkedIn, Threads, Facebook
-- [x] **Sociální sítě pro uživatele** - Přidat podporu pro: - ✅ HOTOVO
+- [x] **Sociální sítě pro uživatele** - Přidat podporu pro: - ✅ HOTOVO (Nutná kontrola)
   - Instagram (ig) - ✅
   - Strava - ✅
   - Twitter/X - ✅
   - LinkedIn - ✅
   - Threads - ✅
   - Facebook - ✅
-- [x] **Vytvořit databázovou strukturu pro sociální sítě uživatelů** - ✅ HOTOVO
+- [x] **Vytvořit databázovou strukturu pro sociální sítě uživatelů** - ✅ HOTOVO (Nutná kontrola)
   - Použity existující `socials` a `user_social` tabulky
   - Přidána pole do formuláře pro editaci uživatele (`app/Views/Admin/users/settings.php`)
   - Zobrazení ikon sociálních sítí na profilu uživatele (veřejná část)

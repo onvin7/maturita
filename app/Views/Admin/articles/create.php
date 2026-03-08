@@ -4,6 +4,7 @@
     </div>
 
     <form action="/admin/articles/store" method="POST" enctype="multipart/form-data">
+        <?= \App\Helpers\CsrfHelper::formInput() ?>
         <div class="row">
             <div class="col-md-12">
                 <div class="mb-3">

@@ -9,6 +9,7 @@ if (session_status() === PHP_SESSION_NONE) {
     <?= FlashMessageHelper::showIfSet('login_success', 'success') ?>
 </div>
 <form method="POST" action="/login/submit/">
+    <?= \App\Helpers\CsrfHelper::formInput() ?>
     <div class="container">
         <div class="ohraniceni">
             <div class="logo"><img src="/assets/graphics/logo_text_cyklistickey.png" alt="Cyklistickey logo">

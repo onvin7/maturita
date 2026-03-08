@@ -61,7 +61,7 @@ class UserAdminController
             session_start();
         }
 
-        if (!CSRFHelper::validateToken($postData['csrf_token'] ?? '')) {
+        if (!\App\Helpers\CsrfHelper::verify($postData['csrf_token'] ?? '')) {
             $_SESSION['error'] = 'Neplatný CSRF token. Zkuste to prosím znovu.';
             header("Location: /admin/users/edit/{$id}");
             exit;
@@ -324,7 +324,7 @@ class UserAdminController
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // CSRF kontrola
-            if (!CSRFHelper::validateToken($_POST['csrf_token'] ?? '')) {
+            if (!\App\Helpers\CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
                 $_SESSION['error'] = 'Neplatný CSRF token.';
                 header('Location: /admin/social-sites');
                 exit;

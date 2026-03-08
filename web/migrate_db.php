@@ -38,20 +38,26 @@ function zprava($text) {
 // KONFIGURACE DATABÁZÍ
 // ============================================================================
 
+// Načtení přihlašovacích údajů
+$credentialsFile = __DIR__ . '/../config/db_credentials.php';
+if (file_exists($credentialsFile)) {
+    require_once $credentialsFile;
+}
+
 // Konfigurace STARÉ databáze (zdroj dat)
 $old_db_config = [
-    'host' => 'md396.wedos.net',
-    'username' => 'w340619_clanky',
-    'password' => 'bqsUuxcr',
-    'database' => 'd340619_clanky'
+    'host' => defined('OLD_DB_HOST') ? OLD_DB_HOST : 'md396.wedos.net',
+    'username' => defined('OLD_DB_USER') ? OLD_DB_USER : 'w340619_clanky',
+    'password' => defined('OLD_DB_PASS') ? OLD_DB_PASS : 'bqsUuxcr',
+    'database' => defined('OLD_DB_NAME') ? OLD_DB_NAME : 'd340619_clanky'
 ];
 
-// Konfigurace NOVÉ databáze (cíl migrace) - načteno z config/db.php
+// Konfigurace NOVÉ databáze (cíl migrace)
 $new_db_config = [
-    'host' => 'md413.wedos.net',
-    'username' => 'w340619_blog',
-    'password' => 'kaYak714?',
-    'database' => 'd340619_blog'
+    'host' => defined('DB_HOST') ? DB_HOST : 'md413.wedos.net',
+    'username' => defined('DB_USER') ? DB_USER : 'w340619_blog',
+    'password' => defined('DB_PASS') ? DB_PASS : 'kaYak714?',
+    'database' => defined('DB_NAME') ? DB_NAME : 'd340619_blog'
 ];
 
 // Cesty k HTML souborům s obsahem článků (zkusí více možností)

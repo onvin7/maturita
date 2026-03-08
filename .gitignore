@@ -10,6 +10,7 @@ web/cache/
 # Environment files
 .env
 .env.local
+config/db_credentials.php
 
 # IDE
 .vscode/
