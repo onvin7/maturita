@@ -20,6 +20,7 @@
     <div class="card mb-4">
         <div class="card-body">
             <form action="/admin/promotions/store" method="post">
+                <?= \App\Helpers\CsrfHelper::formInput() ?>
                 <div class="mb-4">
                     <label for="article_id" class="form-label">Článek pro propagaci <span class="text-danger">*</span></label>
                     

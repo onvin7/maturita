@@ -5,6 +5,7 @@ namespace App\Controllers\Admin;
 use PDO;
 use App\Models\Ad;
 use App\Helpers\LogHelper;
+use App\Helpers\CsrfHelper;
 use DateTime;
 
 class AdAdminController
@@ -45,6 +46,13 @@ class AdAdminController
     // Uložení nové reklamy
     public function store()
     {
+        // CSRF kontrola
+        if (!CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
+            $_SESSION['errors'] = ["Neplatný bezpečnostní token (CSRF). Zkuste formulář odeslat znovu."];
+            header("Location: /admin/ads/create");
+            exit();
+        }
+
         // Kontrola, zda jsou všechny potřebné údaje přítomny
         if (
             !isset($_POST['nazev']) || !isset($_POST['odkaz']) ||
@@ -170,6 +178,13 @@ class AdAdminController
     // Aktualizace reklamy
     public function update($id)
     {
+        // CSRF kontrola
+        if (!CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
+            $_SESSION['errors'] = ["Neplatný bezpečnostní token (CSRF). Zkuste formulář odeslat znovu."];
+            header("Location: /admin/ads/edit/" . $id);
+            exit();
+        }
+
         $ad = $this->adModel->getAdById($id);
 
         if (!$ad) {
@@ -278,6 +293,13 @@ class AdAdminController
     // Smazání reklamy
     public function delete($id)
     {
+        // CSRF kontrola
+        if (!CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
+            $_SESSION['errors'] = ["Neplatný bezpečnostní token (CSRF)."];
+            header("Location: /admin/ads");
+            exit();
+        }
+
         $ad = $this->adModel->getAdById($id);
 
         if (!$ad) {
@@ -304,6 +326,13 @@ class AdAdminController
     // Přepnutí aktivace reklamy
     public function toggleActive($id)
     {
+        // CSRF kontrola
+        if (!CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
+            $_SESSION['errors'] = ["Neplatný bezpečnostní token (CSRF)."];
+            header("Location: /admin/ads");
+            exit();
+        }
+
         $ad = $this->adModel->getAdById($id);
 
         if (!$ad) {
@@ -323,6 +352,13 @@ class AdAdminController
     // Nastavení reklamy jako výchozí
     public function setDefault($id)
     {
+        // CSRF kontrola
+        if (!CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
+            $_SESSION['errors'] = ["Neplatný bezpečnostní token (CSRF)."];
+            header("Location: /admin/ads");
+            exit();
+        }
+
         $ad = $this->adModel->getAdById($id);
 
         if (!$ad) {
@@ -375,5 +411,3 @@ class AdAdminController
         return false;
     }
 }
-
-

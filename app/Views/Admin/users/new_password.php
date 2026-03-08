@@ -19,6 +19,7 @@ $token = isset($_GET['token']) ? htmlspecialchars($_GET['token']) : '';
     </div>
     <div class="inputy">
         <form method="POST" action="/reset-password/save" class="input-wrapper">
+            <?= \App\Helpers\CsrfHelper::formInput() ?>
             <input type="hidden" name="token" value="<?= $token ?>">
             <div class="prvek" style="margin-top: 10px;">
                 <span class="form-title">Obnova hesla</span>

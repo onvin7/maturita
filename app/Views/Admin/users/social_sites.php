@@ -1,4 +1,4 @@
-<?php use App\Helpers\CSRFHelper; ?>
+<?php use App\Helpers\CsrfHelper; ?>
 <section class="content-section">
     <div class="section-header">
         <h1 class="mb-4 text-center"><i class="fas fa-share-alt me-2"></i>Správa sociálních sítí</h1>
@@ -29,7 +29,7 @@
         </div>
         <div class="card-body">
             <form action="/admin/social-sites/save" method="POST">
-                <input type="hidden" name="csrf_token" value="<?= CSRFHelper::generateToken(); ?>">
+                <input type="hidden" name="csrf_token" value="<?= CsrfHelper::generate() ?>">
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <label for="nazev" class="form-label"><i class="fas fa-tag me-2"></i>Název</label>
@@ -90,11 +90,12 @@
                                         <?php endif; ?>
                                     </td>
                                     <td>
-                                        <a href="/admin/social-sites/delete/<?= htmlspecialchars($social['id']) ?>" 
-                                           class="btn btn-sm btn-danger" 
-                                           onclick="return confirm('Opravdu chcete smazat sociální síť <?= htmlspecialchars($social['nazev']) ?>? Tato akce může ovlivnit uživatele, kteří tuto síť používají.')">
-                                            <i class="fas fa-trash-alt me-1"></i>Smazat
-                                        </a>
+                                        <form action="/admin/social-sites/delete/<?= htmlspecialchars($social['id']) ?>" method="POST" class="d-inline" onsubmit="return confirm('Opravdu chcete smazat sociální síť <?= htmlspecialchars($social['nazev']) ?>? Tato akce může ovlivnit uživatele, kteří tuto síť používají.')">
+                                            <input type="hidden" name="csrf_token" value="<?= CsrfHelper::generate() ?>">
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash-alt me-1"></i>Smazat
+                                            </button>
+                                        </form>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

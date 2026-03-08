@@ -102,9 +102,12 @@
                             <a href="/admin/users/edit/<?= htmlspecialchars($user['id']) ?>" class="btn btn-sm btn-primary me-1">
                                 <i class="fas fa-edit me-1"></i>Upravit
                             </a>
-                            <a href="/admin/users/delete/<?= htmlspecialchars($user['id']) ?>" class="btn btn-sm btn-danger" onclick="return confirm('Opravdu chcete smazat tohoto uživatele?')">
-                                <i class="fas fa-trash-alt me-1"></i>Smazat
-                            </a>
+                            <form action="/admin/users/delete/<?= htmlspecialchars($user['id']) ?>" method="POST" class="d-inline" onsubmit="return confirm('Opravdu chcete smazat tohoto uživatele?')">
+                                <?= \App\Helpers\CsrfHelper::formInput() ?>
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash-alt me-1"></i>Smazat
+                                </button>
+                            </form>
                         </td>
                     </tr>
                 <?php endforeach; ?>

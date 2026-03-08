@@ -20,6 +20,7 @@
     <div class="card mb-4">
         <div class="card-body">
             <form action="/admin/ads/store" method="post" enctype="multipart/form-data">
+                <?= \App\Helpers\CsrfHelper::formInput() ?>
                 <div class="mb-4">
                     <label for="nazev" class="form-label">Název reklamy <span class="text-danger">*</span></label>
                     <input type="text" name="nazev" id="nazev" class="form-control" required 

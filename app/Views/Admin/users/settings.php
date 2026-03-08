@@ -6,7 +6,7 @@
             <button type="button" class="btn btn-secondary" onclick="history.back()"><i class="fas fa-arrow-left me-2"></i>Zpět</button>
         </div>
     </div>
-    <form action="/admin/settings/update" method="POST" enctype="multipart/form-data">
+    <form id="settings-form" action="/admin/settings/update" method="POST" enctype="multipart/form-data">
         <?= \App\Helpers\CsrfHelper::formInput() ?>
         <div class="row mb-4">
             <div class="col-12">

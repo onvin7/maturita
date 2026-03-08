@@ -4,6 +4,7 @@
     </div>
 
     <form action="/admin/access-control/update" method="POST">
+        <?= \App\Helpers\CsrfHelper::formInput() ?>
         <div class="table-responsive">
             <table class="table table-bordered table-striped table-hover">
                 <thead class="artikly-thead text-center">

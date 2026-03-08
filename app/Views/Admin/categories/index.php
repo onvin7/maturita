@@ -46,9 +46,12 @@
                             <a href="/admin/categories/edit/<?= htmlspecialchars($category['id']) ?>" class="btn btn-sm btn-primary me-1">
                                 <i class="fa-solid fa-pen"></i> Upravit
                             </a>
-                            <a href="/admin/categories/delete/<?= htmlspecialchars($category['id']) ?>" class="btn btn-sm btn-danger" onclick="return confirm('Opravdu chcete smazat tuto kategorii?')">
-                                <i class="fa-solid fa-trash"></i> Smazat
-                            </a>
+                            <form action="/admin/categories/delete/<?= htmlspecialchars($category['id']) ?>" method="POST" class="d-inline" onsubmit="return confirm('Opravdu chcete smazat tuto kategorii?')">
+                                <?= \App\Helpers\CsrfHelper::formInput() ?>
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <i class="fa-solid fa-trash"></i> Smazat
+                                </button>
+                            </form>
                         </td>
                     </tr>
                 <?php endforeach; ?>

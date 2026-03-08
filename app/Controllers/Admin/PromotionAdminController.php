@@ -6,6 +6,7 @@ use PDO;
 use App\Models\Promotion;
 use App\Models\Article;
 use App\Helpers\LogHelper;
+use App\Helpers\CsrfHelper;
 use DateTime;
 
 class PromotionAdminController
@@ -41,6 +42,13 @@ class PromotionAdminController
     // Uložení nové propagace
     public function store()
     {
+        // CSRF kontrola
+        if (!CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
+            $_SESSION['errors'] = ["Neplatný bezpečnostní token (CSRF). Zkuste formulář odeslat znovu."];
+            header("Location: /admin/promotions/create");
+            exit();
+        }
+
         // Kontrola, zda jsou všechny potřebné údaje přítomny
         if (
             !isset($_POST['article_id']) || !isset($_POST['start_date']) || !isset($_POST['start_time']) ||
@@ -146,6 +154,13 @@ class PromotionAdminController
     // Smazání propagace
     public function delete($id)
     {
+        // CSRF kontrola
+        if (!CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
+            $_SESSION['errors'] = ["Neplatný bezpečnostní token (CSRF)."];
+            header("Location: /admin/promotions");
+            exit();
+        }
+
         // Kontrola, zda nejde o historickou propagaci
         $promotion = $this->promotionModel->getPromotionById($id);
 

@@ -1,10 +1,8 @@
 <?php
-use App\Helpers\CSRFHelper;
 use App\Helpers\FlashMessageHelper;
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-$csrfToken = CSRFHelper::generateToken();
 ?>
 <div class="flash-messages-container">
     <?= FlashMessageHelper::showIfSet('registration_error', 'error') ?>
@@ -16,7 +14,7 @@ $csrfToken = CSRFHelper::generateToken();
     </div>
     <div class="inputy">
         <form method="POST" action="/register/submit" enctype="application/x-www-form-urlencoded">
-                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
+                <?= \App\Helpers\CsrfHelper::formInput() ?>
                 <div class="prvek">
                     <span class="form-title">Registrace</span>
                 </div>

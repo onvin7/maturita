@@ -387,6 +387,11 @@ class ArticleAdminController
 
     public function delete($id)
     {
+        // CSRF kontrola
+        if (!CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
+            die("Chyba: Neplatný bezpečnostní token (CSRF). Zkuste formulář odeslat znovu.");
+        }
+
         // ✅ **Kontrola existence článku v databázi**
         if (!$this->articleModel->getById($id)) {
             die("❌ Chyba: Článek nenalezen.");
@@ -621,6 +626,13 @@ class ArticleAdminController
 
     public function uploadImage()
     {
+        // CSRF kontrola
+        if (!CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
+            http_response_code(403);
+            echo json_encode(['error' => 'Neplatný CSRF token.']);
+            return;
+        }
+
         $uploadDir = __DIR__ . '/../../../web/uploads/articles/';
         $publicPath = '/uploads/articles/';
 

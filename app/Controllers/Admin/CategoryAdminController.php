@@ -86,6 +86,13 @@ class CategoryAdminController
 
     public function delete($id)
     {
+        // CSRF kontrola
+        if (!CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
+            $_SESSION['errors'] = ["Neplatný bezpečnostní token (CSRF)."];
+            header("Location: /admin/categories");
+            exit();
+        }
+
         $result = $this->model->delete($id);
 
         if ($result) {

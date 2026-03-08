@@ -2,7 +2,7 @@
 
 namespace App\Controllers\Admin;
 
-use App\Helpers\CSRFHelper;
+use App\Helpers\CsrfHelper;
 use App\Helpers\TrackingHelper;
 
 class TrackingAdminController
@@ -35,7 +35,7 @@ class TrackingAdminController
      */
     public function update()
     {
-        if (!CSRFHelper::validateToken($_POST['csrf_token'] ?? '')) {
+        if (!CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
             $_SESSION['error'] = 'Neplatný CSRF token';
             header('Location: /admin/tracking');
             exit;

@@ -3,7 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\User;
-use App\Helpers\CSRFHelper;
+use App\Helpers\CsrfHelper;
 use App\Helpers\LogHelper;
 
 class LoginController
@@ -316,6 +316,13 @@ class LoginController
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
+
+        // CSRF kontrola
+        if (!\App\Helpers\CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
+            $_SESSION['registration_error'] = 'Neplatný bezpečnostní token (CSRF). Zkuste to prosím znovu.';
+            header('Location: /register');
+            exit();
+        }
         
         $data = [
             'email' => trim($_POST['email']),
@@ -392,6 +399,13 @@ class LoginController
     {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
+        }
+
+        // CSRF kontrola
+        if (!\App\Helpers\CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
+            $_SESSION['reset_error'] = 'Neplatný bezpečnostní token (CSRF). Zkuste to prosím znovu.';
+            header('Location: /reset-password');
+            exit();
         }
         
         $email = trim($_POST['email'] ?? '');
@@ -517,6 +531,14 @@ class LoginController
     {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
+        }
+
+        // CSRF kontrola
+        if (!\App\Helpers\CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
+            $token = trim($_POST['token'] ?? '');
+            $_SESSION['reset_error'] = 'Neplatný bezpečnostní token (CSRF). Zkuste to prosím znovu.';
+            header('Location: /reset-password?token=' . urlencode($token));
+            exit();
         }
 
         $token = trim($_POST['token'] ?? '');

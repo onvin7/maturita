@@ -1,5 +1,5 @@
 <?php
-use App\Helpers\CSRFHelper;
+use App\Helpers\CsrfHelper;
 ?>
 <section class="content-section">
     <div class="section-header">

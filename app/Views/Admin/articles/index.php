@@ -108,9 +108,12 @@
                                 <a href="/admin/articles/edit/<?= htmlspecialchars($article['id']) ?>" class="btn btn-sm btn-primary" style="margin-bottom: 5px; width: 100%; max-width: 120px;">
                                     <i class="fa-solid fa-pen"></i> Upravit
                                 </a>
-                                <a href="/admin/articles/delete/<?= htmlspecialchars($article['id']) ?>" class="btn btn-sm btn-danger" onclick="return confirm('Opravdu chcete smazat tento článek?')" style="width: 100%; max-width: 120px;">
-                                    <i class="fa-solid fa-trash"></i> Smazat
-                                </a>
+                                <form action="/admin/articles/delete/<?= htmlspecialchars($article['id']) ?>" method="POST" onsubmit="return confirm('Opravdu chcete smazat tento článek?')" style="width: 100%; max-width: 120px;">
+                                    <?= \App\Helpers\CsrfHelper::formInput() ?>
+                                    <button type="submit" class="btn btn-sm btn-danger" style="width: 100%;">
+                                        <i class="fa-solid fa-trash"></i> Smazat
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>

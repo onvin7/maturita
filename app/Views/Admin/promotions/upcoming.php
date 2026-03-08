@@ -84,10 +84,12 @@ use App\Helpers\TimeHelper;
                                 <a href="/article/<?= $promotion['url'] ?>" target="_blank" class="btn btn-sm btn-outline-primary">
                                     <i class="fa-solid fa-external-link me-1"></i> Zobrazit článek
                                 </a>
-                                <a href="/admin/promotions/delete/<?= $promotion['id'] ?>" class="btn btn-sm btn-danger" 
-                                   onclick="return confirm('Opravdu chcete zrušit tuto propagaci?')">
-                                    <i class="fa-solid fa-trash me-1"></i> Zrušit
-                                </a>
+                                <form action="/admin/promotions/delete/<?= $promotion['id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Opravdu chcete zrušit tuto propagaci?')">
+                                    <?= \App\Helpers\CsrfHelper::formInput() ?>
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        <i class="fa-solid fa-trash me-1"></i> Zrušit
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>

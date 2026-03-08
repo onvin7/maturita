@@ -3,7 +3,7 @@
 namespace App\Controllers\Admin;
 
 use App\Models\FlashNewsJSONSimple;
-use App\Helpers\CSRFHelper;
+use App\Helpers\CsrfHelper;
 use App\Helpers\LogHelper;
 use Exception;
 
@@ -52,7 +52,7 @@ class FlashNewsJSONAdminController
             ];
         }
 
-        $csrfToken = CSRFHelper::generateToken();
+        $csrfToken = CsrfHelper::generate();
         $adminTitle = "Správa Flash News | Admin Panel - Cyklistickey magazín";
         $view = '../app/Views/Admin/flashnews/index.php';
         include '../app/Views/Admin/layout/base.php';
@@ -82,7 +82,7 @@ class FlashNewsJSONAdminController
             session_start();
         }
 
-        if (!CSRFHelper::validateToken($_POST['csrf_token'] ?? '')) {
+        if (!CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
             $_SESSION['error'] = 'Neplatný CSRF token';
             header('Location: /admin/flashnews/create');
             exit;
@@ -165,7 +165,7 @@ class FlashNewsJSONAdminController
             session_start();
         }
 
-        if (!CSRFHelper::validateToken($_POST['csrf_token'] ?? '')) {
+        if (!CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
             $_SESSION['error'] = 'Neplatný CSRF token';
             header('Location: /admin/flashnews');
             exit;
@@ -228,7 +228,7 @@ class FlashNewsJSONAdminController
             session_start();
         }
 
-        if (!CSRFHelper::validateToken($_POST['csrf_token'] ?? '')) {
+        if (!CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
             $_SESSION['error'] = 'Neplatný CSRF token';
             header('Location: /admin/flashnews');
             exit;
@@ -267,7 +267,7 @@ class FlashNewsJSONAdminController
             session_start();
         }
 
-        if (!CSRFHelper::validateToken($_POST['csrf_token'] ?? '')) {
+        if (!CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
             $_SESSION['error'] = 'Neplatný CSRF token';
             header('Location: /admin/flashnews');
             exit;
@@ -308,7 +308,7 @@ class FlashNewsJSONAdminController
             session_start();
         }
 
-        if (!CSRFHelper::validateToken($_POST['csrf_token'] ?? '')) {
+        if (!CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
             header('Content-Type: application/json');
             echo json_encode(['success' => false, 'error' => 'Neplatný CSRF token']);
             exit;
@@ -347,7 +347,7 @@ class FlashNewsJSONAdminController
             session_start();
         }
 
-        if (!CSRFHelper::validateToken($_POST['csrf_token'] ?? '')) {
+        if (!CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
             header('Content-Type: application/json');
             echo json_encode(['success' => false, 'error' => 'Neplatný CSRF token']);
             exit;
@@ -391,7 +391,7 @@ class FlashNewsJSONAdminController
             session_start();
         }
 
-        if (!CSRFHelper::validateToken($_POST['csrf_token'] ?? '')) {
+        if (!CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
             $_SESSION['error'] = 'Neplatný CSRF token';
             header('Location: /admin/flashnews');
             exit;
@@ -411,4 +411,3 @@ class FlashNewsJSONAdminController
         exit;
     }
 }
-

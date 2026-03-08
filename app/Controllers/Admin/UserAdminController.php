@@ -3,7 +3,7 @@
 namespace App\Controllers\Admin;
 
 use App\Models\User;
-use App\Helpers\CSRFHelper;
+use App\Helpers\CsrfHelper;
 use App\Helpers\LogHelper;
 
 use function imagecreatefromjpeg;
@@ -115,6 +115,13 @@ class UserAdminController
 
     public function delete($id)
     {
+        // CSRF kontrola
+        if (!\App\Helpers\CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
+            $_SESSION['error'] = 'Neplatný CSRF token.';
+            header("Location: /admin/users");
+            exit;
+        }
+
         $result = $this->model->delete($id); // Volání metody `delete` v modelu
 
         if ($result) {
@@ -146,6 +153,13 @@ class UserAdminController
     public function saveSocialSites()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // CSRF kontrola
+            if (!\App\Helpers\CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
+                $_SESSION['error'] = 'Neplatný CSRF token.';
+                header('Location: /admin/settings');
+                exit;
+            }
+
             $userId = $_SESSION['user_id'];
             
             // First, delete all existing social links for this user
@@ -168,6 +182,13 @@ class UserAdminController
 
     public function updateSettings()
     {
+        // CSRF kontrola
+        if (!\App\Helpers\CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
+            $_SESSION['error'] = 'Neplatný CSRF token.';
+            header('Location: /admin/settings');
+            exit;
+        }
+
         $userId = $_SESSION['user_id'];
         $name = $_POST['name'];
         $surname = $_POST['surname'];
@@ -358,6 +379,13 @@ class UserAdminController
 
     public function deleteSocialSite($id)
     {
+        // CSRF kontrola
+        if (!\App\Helpers\CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
+            $_SESSION['error'] = 'Neplatný CSRF token.';
+            header('Location: /admin/social-sites');
+            exit;
+        }
+
         if (!is_numeric($id)) {
             $_SESSION['error'] = 'Neplatné ID.';
             header('Location: /admin/social-sites');

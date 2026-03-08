@@ -1,12 +1,12 @@
 <?php
-use App\Helpers\CSRFHelper;
+use App\Helpers\CsrfHelper;
 
 $title = 'Upravit Flash News';
 $css = ['admin'];
 
 // Zajištění, že jsou proměnné definované
 $flashNews = $flashNews ?? [];
-$csrfToken = CSRFHelper::generateToken();
+$csrfToken = CsrfHelper::generate();
 ?>
 
 <div class="container-fluid">

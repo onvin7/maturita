@@ -1,5 +1,5 @@
 <?php
-use App\Helpers\CSRFHelper;
+use App\Helpers\CsrfHelper;
 
 $pageTitle = 'Správa Tracking Kódů';
 $pageDescription = 'Správa Meta Pixel a Google Analytics tracking kódů';
@@ -42,7 +42,7 @@ $pageDescription = 'Správa Meta Pixel a Google Analytics tracking kódů';
                         </div>
                         <div class="card-body">
                             <form method="POST" action="/admin/tracking/update">
-                                <input type="hidden" name="csrf_token" value="<?= CSRFHelper::generateToken() ?>">
+                                <input type="hidden" name="csrf_token" value="<?= CsrfHelper::generate() ?>">
                                 
                                 <div class="mb-3">
                                     <div class="form-check form-switch">

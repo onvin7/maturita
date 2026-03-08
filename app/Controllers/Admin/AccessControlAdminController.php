@@ -3,6 +3,7 @@
 namespace App\Controllers\Admin;
 
 use App\Models\AccessControl;
+use App\Helpers\CsrfHelper;
 use App\Helpers\LogHelper;
 
 class AccessControlAdminController
@@ -31,6 +32,11 @@ class AccessControlAdminController
     public function update()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // CSRF kontrola
+            if (!CsrfHelper::verify($_POST['csrf_token'] ?? '')) {
+                die("Chyba: Neplatný bezpečnostní token (CSRF). Zkuste formulář odeslat znovu.");
+            }
+
             $pages = $this->model->getAllPages();
 
             foreach ($pages as $page) {

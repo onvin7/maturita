@@ -86,22 +86,30 @@
                             </td>
                             <td><?= $ad['frekvence'] ?></td>
                             <td>
-                                <div class="btn-group" role="group">
+                                <div class="d-flex gap-1" role="group">
                                     <a href="/admin/ads/edit/<?= $ad['id'] ?>" class="btn btn-sm btn-outline-primary" title="Upravit">
                                         <i class="fa-solid fa-edit"></i>
                                     </a>
-                                    <a href="/admin/ads/toggle-active/<?= $ad['id'] ?>" class="btn btn-sm btn-outline-<?= $isActive ? 'warning' : 'success' ?>" title="<?= $isActive ? 'Deaktivovat' : 'Aktivovat' ?>">
-                                        <i class="fa-solid fa-<?= $isActive ? 'eye-slash' : 'eye' ?>"></i>
-                                    </a>
+                                    <form action="/admin/ads/toggle-active/<?= $ad['id'] ?>" method="POST" class="d-inline">
+                                        <?= \App\Helpers\CsrfHelper::formInput() ?>
+                                        <button type="submit" class="btn btn-sm btn-outline-<?= $isActive ? 'warning' : 'success' ?>" title="<?= $isActive ? 'Deaktivovat' : 'Aktivovat' ?>">
+                                            <i class="fa-solid fa-<?= $isActive ? 'eye-slash' : 'eye' ?>"></i>
+                                        </button>
+                                    </form>
                                     <?php if (!$ad['vychozi']): ?>
-                                        <a href="/admin/ads/set-default/<?= $ad['id'] ?>" class="btn btn-sm btn-outline-info" title="Nastavit jako výchozí">
-                                            <i class="fa-solid fa-star"></i>
-                                        </a>
+                                        <form action="/admin/ads/set-default/<?= $ad['id'] ?>" method="POST" class="d-inline">
+                                            <?= \App\Helpers\CsrfHelper::formInput() ?>
+                                            <button type="submit" class="btn btn-sm btn-outline-info" title="Nastavit jako výchozí">
+                                                <i class="fa-solid fa-star"></i>
+                                            </button>
+                                        </form>
                                     <?php endif; ?>
-                                    <a href="/admin/ads/delete/<?= $ad['id'] ?>" class="btn btn-sm btn-outline-danger" 
-                                       onclick="return confirm('Opravdu chcete smazat tuto reklamu?')" title="Smazat">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </a>
+                                    <form action="/admin/ads/delete/<?= $ad['id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Opravdu chcete smazat tuto reklamu?')">
+                                        <?= \App\Helpers\CsrfHelper::formInput() ?>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Smazat">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>

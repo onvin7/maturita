@@ -141,6 +141,12 @@ document.addEventListener('DOMContentLoaded', function() {
                             const formData = new FormData();
                             formData.append('file', file);
                             
+                            // Přidání CSRF tokenu
+                            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                            if (csrfToken) {
+                                formData.append('csrf_token', csrfToken);
+                            }
+                            
                             const preview = document.getElementById('image-preview');
                             preview.innerHTML = '<span style="color: #666;">Nahrávám...</span>';
                             updateSubmitButton(false);
@@ -453,6 +459,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         function uploadImage(file, index) {
                             const formData = new FormData();
                             formData.append('file', file);
+                            
+                            // Přidání CSRF tokenu
+                            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                            if (csrfToken) {
+                                formData.append('csrf_token', csrfToken);
+                            }
                             
                             activeUploads++;
                             updateSubmitButton();
@@ -843,6 +855,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 return new Promise((resolve, reject) => {
                     const formData = new FormData();
                     formData.append('file', blobInfo.blob(), blobInfo.filename());
+
+                    // Přidání CSRF tokenu
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                    if (csrfToken) {
+                        formData.append('csrf_token', csrfToken);
+                    }
 
                     fetch('/admin/upload-image', {
                         method: 'POST',

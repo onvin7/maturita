@@ -1,9 +1,9 @@
 <?php
-use App\Helpers\CSRFHelper;
+use App\Helpers\CsrfHelper;
 
 $title = 'Nová Flash News';
 $css = ['admin'];
-$csrfToken = CSRFHelper::generateToken();
+$csrfToken = CsrfHelper::generate();
 ?>
 
 <div class="container-fluid">
