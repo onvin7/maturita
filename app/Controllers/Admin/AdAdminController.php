@@ -123,7 +123,7 @@ class AdAdminController
         // Nahrání obrázku
         $obrazek = $this->uploadImage($_FILES['obrazek']);
         if (!$obrazek) {
-            $_SESSION['errors'] = ["Chyba při nahrávání obrázku."];
+            $_SESSION['errors'] = ["Obrázek se nepodařilo nahrát. Povolené: JPEG/PNG/GIF/WebP, rozměr 1024×180 px."];
             header("Location: /admin/ads/create");
             exit();
         }
@@ -253,16 +253,19 @@ class AdAdminController
         // Nahrání nového obrázku, pokud byl nahrán
         $obrazek = $ad['obrazek']; // Použijeme stávající
         if (isset($_FILES['obrazek']) && $_FILES['obrazek']['error'] === UPLOAD_ERR_OK) {
-            // Smazat starý obrázek
+            $newImage = $this->uploadImage($_FILES['obrazek']);
+            if (!$newImage) {
+                $_SESSION['errors'] = ["Obrázek se nepodařilo nahrát. Povolené: JPEG/PNG/GIF/WebP, rozměr 1024×180 px."];
+                header("Location: /admin/ads/edit/" . $id);
+                exit();
+            }
+
             $oldImagePath = __DIR__ . '/../../../web/uploads/ads/' . $ad['obrazek'];
-            if (file_exists($oldImagePath)) {
+            if (!empty($ad['obrazek']) && file_exists($oldImagePath)) {
                 @unlink($oldImagePath);
             }
 
-            $newImage = $this->uploadImage($_FILES['obrazek']);
-            if ($newImage) {
-                $obrazek = $newImage;
-            }
+            $obrazek = $newImage;
         }
 
         // Pokud je nastavena jako výchozí, zrušíme ostatní výchozí
@@ -390,16 +393,28 @@ class AdAdminController
             mkdir($targetDir, 0777, true);
         }
 
-        // Kontrola typu souboru - povolujeme pouze obrázky
-        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-        $fileType = $file['type'];
+        $imageInfo = @getimagesize($file['tmp_name']);
+        if ($imageInfo === false) {
+            return false;
+        }
 
-        if (!in_array($fileType, $allowedTypes)) {
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        $mime = $imageInfo['mime'] ?? '';
+        if (!in_array($mime, $allowedTypes, true)) {
+            return false;
+        }
+
+        $expectedWidth = 1024;
+        $expectedHeight = 180;
+
+        $width = (int) ($imageInfo[0] ?? 0);
+        $height = (int) ($imageInfo[1] ?? 0);
+        if ($width !== $expectedWidth || $height !== $expectedHeight) {
             return false;
         }
 
         // Generování unikátního názvu souboru
-        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $extension = strtolower((string) pathinfo($file['name'], PATHINFO_EXTENSION));
         $uniqueName = uniqid('ad_', true) . '.' . $extension;
         $targetPath = $targetDir . $uniqueName;
 

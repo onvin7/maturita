@@ -37,7 +37,7 @@
                              style="max-width: 300px; max-height: 200px; object-fit: contain; border: 1px solid #ddd; padding: 5px;">
                     </div>
                     <input type="file" name="obrazek" id="obrazek" class="form-control" accept="image/*">
-                    <div class="form-text">Nahrajte nový obrázek pouze pokud chcete změnit současný. Podporované formáty: JPEG, PNG, GIF, WebP</div>
+                    <div class="form-text">Nahrajte nový obrázek pouze pokud chcete změnit současný. Podporované formáty: JPEG, PNG, GIF, WebP. Požadovaný rozměr: 1024×180 px.</div>
                     <div id="imagePreview" class="mt-2" style="display: none;">
                         <img id="previewImg" src="" alt="Náhled" style="max-width: 300px; max-height: 200px; object-fit: contain;">
                     </div>
@@ -164,17 +164,26 @@ document.addEventListener('DOMContentLoaded', function() {
     // Nastaví výchozí čas konce na o 1 hodinu více než čas začátku
     const startTimeInput = document.getElementById('start_time');
     const endTimeInput = document.getElementById('end_time');
+
+    function addDaysToDateString(dateString, days) {
+        const date = new Date(`${dateString}T00:00:00`);
+        date.setDate(date.getDate() + days);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
     
     function setDefaultEndTime() {
         const startTime = startTimeInput.value;
         if (startTime) {
             const [hours, minutes] = startTime.split(':').map(Number);
-            let endHours = hours + 1;
-            if (endHours >= 24) {
-                endHours = 23;
-                endTimeInput.value = `${endHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-            } else {
-                endTimeInput.value = `${endHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            const wrapsToNextDay = hours + 1 >= 24;
+            const endHours = (hours + 1) % 24;
+            endTimeInput.value = `${endHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+
+            if (wrapsToNextDay && startDateInput.value && endDateInput.value === startDateInput.value) {
+                endDateInput.value = addDaysToDateString(startDateInput.value, 1);
             }
         }
     }

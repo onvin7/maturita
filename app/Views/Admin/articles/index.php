@@ -52,12 +52,14 @@
                             <span><?= ($_GET['sort_by'] ?? '') === 'user_id' ? (($_GET['order'] ?? 'DESC') === 'ASC' ? '⬆' : '⬇') : '' ?></span>
                         </a>
                     </th>
+                    <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] == 3): ?>
                     <th>
                         <a href="?sort_by=pocet_zobrazeni&amp;order=<?= (($_GET['sort_by'] ?? '') === 'pocet_zobrazeni' && ($_GET['order'] ?? 'DESC') === 'ASC') ? 'DESC' : 'ASC' ?>" class="text-white text-decoration-none ">
                             <span>Zobrazení</span>
                             <span><?= ($_GET['sort_by'] ?? '') === 'pocet_zobrazeni' ? (($_GET['order'] ?? 'DESC') === 'ASC' ? '⬆' : '⬇') : '' ?></span>
                         </a>
                     </th>
+                    <?php endif; ?>
                     <th>Akce</th>
                 </tr>
             </thead>
@@ -95,11 +97,13 @@
                             </span>
                         </td>
                         <td><?= htmlspecialchars($article['autor_jmeno'] . ' ' . $article['autor_prijmeni']) ?></td>
+                        <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] == 3): ?>
                         <td>
                             <span style="background-color: <?= $color ?>; color: #000; padding: 8px 16px; border-radius: 4px; font-size: 14px; font-weight: 500; display: inline-block; min-width: 50px; text-align: center;">
                                 <?= htmlspecialchars($article['pocet_zobrazeni'] ?? 0) ?>
                             </span>
                         </td>
+                        <?php endif; ?>
                         <td>
                             <div style="display: flex; flex-direction: column; align-items: center; gap: 0;">
                                 <a href="/admin/articles/preview/<?= htmlspecialchars($article['id']) ?>" class="btn btn-sm btn-success text-white" target="_blank" style="margin-bottom: 5px; width: 100%; max-width: 120px;">

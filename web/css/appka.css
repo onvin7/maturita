@@ -298,7 +298,8 @@ body {
 }
 
 .container-appka .funkce {
-  height: 250px;
+  /* height: 250px; - odebráno, aby se výška přizpůsobila obsahu */
+  min-height: 250px; /* pro zachování minimální výšky */
   margin-top: 15vh;
   justify-content: center;   
   display: flex;
@@ -319,12 +320,14 @@ body {
   text-align: center;
   border-radius: 15px;
   font-weight: 200;
+  overflow: hidden;
 }
 
 .container-appka .funkce .prvek i {
-  font-size: 50px;
+  font-size: 60px;
   padding-top: 4px;
   color: #3eb7e7;
+  overflow: hidden;
 }
 
 @media screen and (max-width: 850px) {

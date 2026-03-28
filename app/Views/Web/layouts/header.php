@@ -17,28 +17,49 @@
         // navigator.sendBeacon('templates/leave.php'); // Soubor neexistuje
     });
 </script>
-</head>
-
-<body>
     <div id="loader" style="position: fixed; left: 0; top: 0; width: 100%; height: 100%; background-color: #f1f1f1; z-index: 999999999; transition: all .5s; filter: invert(1);">
-        <img src="/assets/graphics/loader.gif" alt="Loading..." style="width: 600px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+        <div style="width: 64px; height: 64px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 6px solid #00000F; border-top-color: transparent; border-radius: 50%; animation: loader-spin 0.8s linear infinite;"></div>
     </div>
+
+    <style>
+        @keyframes loader-spin {
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+    </style>
 
     <div class="navbar">
         <a href="/">
-            <img loading="lazy" src="/assets/graphics/logo.png" alt="logo">
+            <img src="/assets/graphics/logo.png" alt="logo" decoding="async">
         </a>
         <div class="inside-nav">
             <ul>
                 <?php echo $links; ?>
             </ul>
         </div>
+        <div class="header-search header-search--desktop" data-header-search>
+            <form action="/search" method="GET" role="search" class="header-search__form">
+                <input type="search" name="q" class="header-search__input" placeholder="Hledat..." autocomplete="off" aria-label="Hledat">
+                <button type="submit" class="search-icon-desktop header-search__button js-header-search-button" aria-label="Hledat">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </button>
+            </form>
+        </div>
     </div>
 
     <div class="nav-mobile">
         <a href="/">
-            <img loading="lazy" src="/assets/graphics/CYKLISTICKEY.png" alt="logo">
+            <img src="/assets/graphics/CYKLISTICKEY.png" alt="logo" decoding="async">
         </a>
+        <div class="header-search header-search--mobile" data-header-search>
+            <form action="/search" method="GET" role="search" class="header-search__form">
+                <input type="search" name="q" class="header-search__input" placeholder="Hledat..." autocomplete="off" aria-label="Hledat">
+                <button type="submit" class="search-icon-mobile header-search__button js-header-search-button" aria-label="Hledat">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </button>
+            </form>
+        </div>
         <div id='menu'>
             <div class='menu-line1'></div>
             <div class='menu-line2'></div>
@@ -77,6 +98,63 @@
                     navMobile.style.transition = '0.2s';
                 }
             };
+
+            const headerSearches = $All('[data-header-search]');
+
+            headerSearches.forEach((container) => {
+                const form = container.querySelector('form');
+                const input = container.querySelector('input[name="q"]');
+                const button = container.querySelector('.js-header-search-button');
+
+                if (!form || !input || !button) {
+                    return;
+                }
+
+                const open = () => {
+                    container.classList.add('is-open');
+                    input.focus();
+                    input.select();
+                };
+
+                const close = () => {
+                    container.classList.remove('is-open');
+                };
+
+                button.addEventListener('click', (e) => {
+                    if (!container.classList.contains('is-open')) {
+                        e.preventDefault();
+                        open();
+                        return;
+                    }
+
+                    if (!input.value.trim()) {
+                        e.preventDefault();
+                        input.focus();
+                    }
+                });
+
+                form.addEventListener('submit', (e) => {
+                    if (!container.classList.contains('is-open')) {
+                        e.preventDefault();
+                        open();
+                        return;
+                    }
+
+                    if (!input.value.trim()) {
+                        e.preventDefault();
+                        input.focus();
+                    }
+                });
+
+                input.addEventListener('keydown', (e) => {
+                    if (e.key !== 'Escape') {
+                        return;
+                    }
+                    e.preventDefault();
+                    close();
+                    button.focus();
+                });
+            });
         };
 
         window.addEventListener('scroll', function() {

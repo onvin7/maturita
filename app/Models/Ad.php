@@ -25,6 +25,7 @@ class Ad
             FROM reklamy r
             LEFT JOIN users u ON r.user_id = u.id
             WHERE r.aktivni = 1 
+            AND r.vychozi = 0
             AND r.zacatek <= NOW() 
             AND r.konec >= NOW()
             ORDER BY r.vychozi DESC, r.frekvence ASC, r.vytvoreno DESC
@@ -130,6 +131,8 @@ class Ad
             FROM reklamy 
             WHERE vychozi = 1 
             AND aktivni = 1
+            AND zacatek <= NOW()
+            AND konec >= NOW()
             LIMIT 1
         ");
         return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -272,20 +275,56 @@ class Ad
      */
     public function getRandomActiveAd()
     {
+        return $this->getWeightedRandomActiveAd();
+    }
+
+    public function getWeightedRandomActiveAd(array $excludeIds = [])
+    {
         $ads = $this->getActiveAds();
-        
+
+        if (!empty($excludeIds)) {
+            $excludeLookup = array_fill_keys(array_map('intval', $excludeIds), true);
+            $ads = array_values(array_filter($ads, function ($ad) use ($excludeLookup) {
+                return empty($excludeLookup[(int) ($ad['id'] ?? 0)]);
+            }));
+        }
+
         if (empty($ads)) {
-            // Pokud není žádná aktivní, zkusíme výchozí
             return $this->getDefaultAd();
         }
 
-        // Pokud je jen jedna, vrať ji
         if (count($ads) === 1) {
             return $ads[0];
         }
 
-        // Jinak vyber náhodnou
-        return $ads[array_rand($ads)];
+        $weights = [];
+        $totalWeight = 0;
+
+        foreach ($ads as $ad) {
+            $freq = (int) ($ad['frekvence'] ?? 1);
+            if ($freq < 1) {
+                $freq = 1;
+            }
+
+            $weight = (int) round(1000 / $freq);
+            if ($weight < 1) {
+                $weight = 1;
+            }
+
+            $weights[] = $weight;
+            $totalWeight += $weight;
+        }
+
+        $pick = random_int(1, $totalWeight);
+
+        foreach ($ads as $i => $ad) {
+            $pick -= $weights[$i];
+            if ($pick <= 0) {
+                return $ad;
+            }
+        }
+
+        return $ads[array_key_last($ads)];
     }
 }
 

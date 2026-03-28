@@ -5,6 +5,9 @@ namespace App\Controllers\Web;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\User;
+use App\Models\Ad;
+use App\Helpers\TextHelper;
+use App\Helpers\AdInsertionHelper;
 use App\Helpers\SEOHelper;
 use App\Helpers\LinkTrackingHelper;
 
@@ -13,12 +16,14 @@ class ArticleController
     private $articleModel;
     private $categoryModel;
     private $userModel;
+    private $adModel;
 
     public function __construct($db)
     {
         $this->articleModel = new Article($db);
         $this->categoryModel = new Category($db);
         $this->userModel = new User($db);
+        $this->adModel = new Ad($db);
     }
 
     // Zobrazení všech článků
@@ -170,6 +175,35 @@ class ArticleController
         // Přidání trackingu k odkazům v obsahu článku
         if (isset($article['obsah'])) {
             $article['obsah'] = LinkTrackingHelper::addTrackingToLinks($article['obsah'], $article['id']);
+        }
+
+        $articleContentHtml = '';
+        if (isset($article['obsah'])) {
+            $articleContentHtml = TextHelper::processEmbeds($article['obsah']);
+
+            $blockCount = AdInsertionHelper::countContentBlocks($articleContentHtml);
+            $insertAfterBlocks = AdInsertionHelper::getInsertAfterBlocksForLength($blockCount, 2);
+
+            $adsToInsert = [];
+            if (!empty($insertAfterBlocks)) {
+                $firstAd = $this->adModel->getWeightedRandomActiveAd();
+                if (is_array($firstAd) && !empty($firstAd['obrazek'])) {
+                    $adsToInsert[] = $firstAd;
+                }
+
+                if (count($insertAfterBlocks) >= 2) {
+                    $exclude = [];
+                    if (!empty($firstAd['id'])) {
+                        $exclude[] = (int) $firstAd['id'];
+                    }
+                    $secondAd = $this->adModel->getWeightedRandomActiveAd($exclude);
+                    if (is_array($secondAd) && !empty($secondAd['obrazek'])) {
+                        $adsToInsert[] = $secondAd;
+                    }
+                }
+
+                $articleContentHtml = AdInsertionHelper::insertAdsIntoHtml($articleContentHtml, $adsToInsert, $insertAfterBlocks);
+            }
         }
 
         $css = ["main-page", "clanek", "autor_clanku", "lightbox", "gallery-fix"];

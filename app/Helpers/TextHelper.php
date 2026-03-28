@@ -200,4 +200,61 @@ class TextHelper
         $string = preg_replace("/\s+/", "-", $string); // Nahrazení mezer pomlčkou
         return $string;
     }
+
+    /**
+     * Vygeneruje úryvek textu s zvýrazněným hledaným výrazem
+     * 
+     * @param string $text Celý text (HTML obsah)
+     * @param string $query Hledaný výraz
+     * @return string Formátovaný úryvek
+     */
+    public static function getSearchSnippet(string $text, string $query): string
+    {
+        // Odstraníme HTML tagy pro čistý text
+        $cleanText = strip_tags($text);
+        $cleanTextLength = mb_strlen($cleanText);
+        
+        // Najdeme pozici hledaného výrazu (case-insensitive)
+        $pos = mb_stripos($cleanText, $query);
+        
+        // Pokud výraz v textu není (např. byl jen v nadpisu), vrátíme začátek textu
+        if ($pos === false) {
+            return self::truncate($cleanText, 200);
+        }
+        
+        // Pokud je výraz na začátku textu (řekněme prvních 50 znaků)
+        if ($pos < 50) {
+            $snippet = mb_substr($cleanText, 0, 200);
+            if ($cleanTextLength > 200) {
+                $snippet .= '...';
+            }
+        } else {
+            // Výraz je hlouběji v textu
+            // Vezmeme 50 znaků před a 150 znaků za (včetně délky hledaného slova)
+            $start = max(0, $pos - 50);
+            $length = mb_strlen($query) + 50 + 150;
+            
+            $snippet = mb_substr($cleanText, $start, $length);
+            
+            // Přidáme "..." na začátek, pokud nejsme na začátku textu
+            if ($start > 0) {
+                $snippet = '...' . $snippet;
+            }
+            
+            // Přidáme "..." na konec, pokud nejsme na konci textu
+            if ($start + $length < $cleanTextLength) {
+                $snippet .= '...';
+            }
+        }
+        
+        // Zvýraznění hledaného výrazu
+        // Použijeme preg_replace pro case-insensitive nahrazení při zachování původní velikosti písmen v textu
+        $highlighted = preg_replace(
+            '/' . preg_quote($query, '/') . '/i', 
+            '<span class="search-highlight">$0</span>', 
+            $snippet
+        );
+        
+        return $highlighted;
+    }
 } 

@@ -68,6 +68,9 @@
                             <span><?= ($sortBy === 'role') ? ($order === 'ASC' ? '⬆' : '⬇') : '' ?></span>
                         </a>
                     </th>
+                    <th>
+                        <i class="fas fa-eye me-1"></i>Redakce
+                    </th>
                     <th><i class="fas fa-cogs me-1"></i>Akce</th>
                 </tr>
             </thead>
@@ -97,6 +100,13 @@
                                     echo '<span class="badge bg-secondary"><i class="fas fa-user-slash me-1"></i>Neznámá role</span>';
                             }
                             ?>
+                        </td>
+                        <td>
+                            <?php if (isset($user['public_visible']) && $user['public_visible'] == 1): ?>
+                                <span class="badge bg-success"><i class="fas fa-check me-1"></i>Ano</span>
+                            <?php else: ?>
+                                <span class="badge bg-danger"><i class="fas fa-times me-1"></i>Ne</span>
+                            <?php endif; ?>
                         </td>
                         <td>
                             <a href="/admin/users/edit/<?= htmlspecialchars($user['id']) ?>" class="btn btn-sm btn-primary me-1">

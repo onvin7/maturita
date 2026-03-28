@@ -16,6 +16,7 @@
   width: 100%;
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
   align-items: center;
   background-image: linear-gradient(
     to bottom,
@@ -280,3 +281,140 @@
   top: 0;
   transition: opacity 0.1s linear;
 }
+
+/* Search Icon */
+.search-icon-mobile {
+  position: absolute;
+  right: 60px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: white;
+  font-size: 24px;
+  z-index: 1001;
+  text-decoration: none;
+}
+
+@media screen and (min-width: 930px) {
+  .search-icon-mobile {
+    display: none;
+  }
+}
+
+
+/* Search Icon Desktop */
+.search-icon-desktop {
+  margin-right: 40px;
+  margin-top: 20px;
+  color: white;
+  transition: all 0.3s ease;
+  z-index: 99999;
+}
+
+.search-icon-desktop:hover {
+  color: #f87fc6;
+  text-shadow: 0 0 10px #f87fc6;
+}
+
+.navbar.scrolled .search-icon-desktop {
+  margin-top: 0px;
+  margin-bottom: 5px;
+}
+
+@media screen and (max-width: 930px) {
+  .search-icon-desktop {
+    display: none;
+  }
+}
+
+.header-search {
+  display: flex;
+  align-items: center;
+}
+
+.header-search__form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-search__input {
+  box-sizing: border-box;
+  width: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  padding: 0;
+  border-radius: 30px;
+  border: 0;
+  background-color: transparent;
+  color: white;
+  outline: none;
+  transition: width 0.2s ease, opacity 0.2s ease;
+}
+
+.header-search__input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.header-search.is-open .header-search__input {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  padding: 10px 14px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.header-search--desktop {
+  margin-right: 40px;
+  margin-top: 20px;
+  z-index: 99999;
+}
+
+.navbar.scrolled .header-search--desktop {
+  margin-top: 0px;
+  margin-bottom: 5px;
+}
+
+.header-search--desktop.is-open .header-search__input {
+  width: 260px;
+}
+
+.header-search--desktop .search-icon-desktop {
+  margin-right: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.navbar.scrolled .header-search--desktop .search-icon-desktop {
+  margin-bottom: 0;
+}
+
+.header-search--mobile {
+  position: absolute;
+  right: 60px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1001;
+}
+
+.header-search--mobile.is-open .header-search__input {
+  width: calc(100vw - 170px);
+  max-width: 320px;
+}
+
+.header-search--mobile .search-icon-mobile {
+  position: static;
+  right: auto;
+  top: auto;
+  transform: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+

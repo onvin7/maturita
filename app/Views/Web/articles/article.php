@@ -56,8 +56,7 @@ use App\Helpers\TextHelper;
         <div class="text-editor">
             <?php
             if (isset($article['obsah'])) {
-                // Zpracování embedů (Instagram, Twitter, Facebook, TikTok, YouTube)
-                echo TextHelper::processEmbeds($article['obsah']);
+                echo $articleContentHtml ?? TextHelper::processEmbeds($article['obsah']);
             } else {
                 include $emptyArticlePath;
             }

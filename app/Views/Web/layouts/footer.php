@@ -1,4 +1,4 @@
-<footer style="background-image: url('/assets/graphics/pozadi-footer.png');">
+<footer style="background-image: url('/assets/graphics/pozadi-footer.webp');">
     <div class="left-side">
         <div class="kontakt">
             <h2>kontaktujte nás</h2>

@@ -369,15 +369,13 @@ body {
 
     max-width: 100%;
 
-    display: flex;
+    display: grid;
 
-    flex-direction: row;
+    grid-template-columns: repeat(4, 1fr);
 
     height: max-content;
 
     gap: 15px;
-
-    justify-content: space-between;
 
     margin: 10vh 30px 10vh 10px;
 }
@@ -407,7 +405,7 @@ body {
 
     padding: 10px 15px 15px;
 
-    height: 100%;
+    height: max-content;
 
     position: relative;
 

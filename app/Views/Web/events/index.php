@@ -1,4 +1,4 @@
-<div class="nadpis">
+<div class="nadpis events-header">
     <h1>Events</h1>
     <h2>Events</h2>
 </div>
@@ -11,8 +11,11 @@
             <h3 class="hero-subtitle">NOVĚ POD HLAVIČKOU PROJEKTU <span class="highlight">BAV SE SPORTEM</span></h3>
             
             <p class="hero-text">
-                Přihlásíš se, my zařídíme zbytek. Vyber si závod, jednoduše se zaregistruj a přijď závodit.
-                Férové závody, přehledné výsledky a skvělá atmosféra.
+                Jakožto hosté, závodníci či v rámci točení videí pro vás, se účastníme i dalších akcí po celé České republice i okolních zemích. Kde a kdy budeme, případně jejich seznam naleznete níže, či vždy v dostatečném předstihu na našich sociálních sítích.
+            </p>
+            
+            <p class="hero-text">
+                Naše vlastní akce nově tvoříme na odděleném projektu Bav se sportem, kde najdete veškeré informace.
             </p>
 
             <a href="https://bavsesportem.cz/" target="_blank" class="btn-hero">
@@ -22,7 +25,7 @@
         </div>
     </div>
 
-    <!-- Archiv závodů -->
+    <!-- Archiv závodů - ZATÍM SKRYTO
     <div class="events-archive" id="archive">
 
         <?php
@@ -91,7 +94,6 @@
                     <h2><?= htmlspecialchars($year) ?></h2>
                 </div>
 
-                <!-- Závody -->
                 <div class="events-section">
                     <h3 class="section-title">Závody</h3>
                     <div class="events-list">
@@ -130,7 +132,6 @@
                     </div>
                 </div>
 
-                <!-- Seriál závodů -->
                 <div class="events-section series-section">
                     <h3 class="section-title"><?= htmlspecialchars($yearData['series']['title']) ?></h3>
                     <div class="events-list series-list">
@@ -171,6 +172,7 @@
             </div>
         <?php endforeach; ?>
     </div>
+    -->
 </div>
 
     <script>

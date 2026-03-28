@@ -63,28 +63,20 @@ class AuthMiddleware
             $uri = implode('/', $parts);
         }
 
-        // ✅ **Debug: Výpis aktuální URL**
-        error_log("DEBUG: Přístup na URI: " . $uri);
-
         // ✅ **Superadmin (role 3) má neomezený přístup – ukončí kontrolu**
         $currentRole = (int) $_SESSION['role'];
         if ($currentRole === 3) {
-            error_log("DEBUG: Role 3 má přístup ke všemu.");
             return;
         }
 
         // ✅ **Všichni přihlášení uživatelé mohou na hlavní stránku adminu**
         if ($uri === '' || $uri === 'home') {
-            error_log("DEBUG: Přístup na hlavní admin stránku povolen.");
             return;
         }
 
         // ✅ **Načtení oprávnění z databáze**
         $accessControl = new AccessControl($db);
         $pagePermissions = $accessControl->getPagePermissions($uri);
-
-        // ✅ **Debug: Výpis oprávnění ke stránce**
-        error_log("DEBUG: Oprávnění k '$uri': " . print_r($pagePermissions, true));
 
         // ✅ **Pokud stránka není v databázi, automaticky ji přidej**
         if (!$pagePermissions) {

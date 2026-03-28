@@ -3,11 +3,11 @@
 [![PHP Version](https://img.shields.io/badge/PHP-7.4%2B-777BB4?style=flat-square&logo=php)](https://www.php.net/)
 [![MySQL](https://img.shields.io/badge/MySQL-5.7%2B-4479A1?style=flat-square&logo=mysql&logoColor=white)](https://www.mysql.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
-[![Status](https://img.shields.io/badge/Status-Active-success?style=flat-square)](https://www.cyklistickey.cz)
+[![Status](https://img.shields.io/badge/Status-Staging-yellow?style=flat-square)](https://bicenc.cyklistickey.cz)
 
 > Moderní redakční systém pro správu cyklistického magazínu - intuitivní, přehledný a bez zbytečných komplikací.
 
-[🌐 Live Demo](https://www.cyklistickey.cz) | [📖 Dokumentace](#instalace) | [🐛 Issues](../../issues) | [💬 Discussions](../../discussions)
+[🧪 Staging](https://bicenc.cyklistickey.cz) | [🌐 Produkce (zatím nenasazeno)](https://www.cyklistickey.cz) | [📖 Dokumentace](#-instalace) | [🐛 Issues](../../issues) | [💬 Discussions](../../discussions)
 
 ---
 
@@ -39,7 +39,7 @@
 
 ## 🎯 O projektu
 
-**Cyklistický magazín** je plnohodnotný redakční systém vytvořený pro správu obsahu cyklistického webu [cyklistickey.cz](https://www.cyklistickey.cz). Systém umožňuje tvorbu, úpravu a publikaci článků s pokročilými funkcemi jako je SEO optimalizace, statistiky, propagace a mnoho dalšího.
+**Cyklistický magazín** je plnohodnotný redakční systém vytvořený pro správu obsahu cyklistického webu **cyklistickey.cz** (cílová produkce). Aktuálně běží ve staging prostředí na [bicenc.cyklistickey.cz](https://bicenc.cyklistickey.cz). Systém umožňuje tvorbu, úpravu a publikaci článků s pokročilými funkcemi jako je SEO optimalizace, statistiky, propagace a mnoho dalšího.
 
 ### Pro koho je to?
 
@@ -55,6 +55,30 @@ Nechtěl bych ti to komplikovat, takže jsem to udělal tak, aby to fungovalo pr
 - 🔒 **Bezpečný** - ochrana proti všemu, co by mohlo škodit
 - 🎨 **Moderní design** - funguje na mobilu, tabletu i počítači
 - 🚀 **SEO friendly** - Google tě bude milovat
+
+---
+
+## ✅ Aktuální stav (2026-03-27)
+
+### Kde to běží
+- **Staging:** https://bicenc.cyklistickey.cz
+- **Cílová produkce:** https://www.cyklistickey.cz (zatím nenasazeno)
+
+### Hotovo (v kódu)
+- **Veřejná část:** články, kategorie, autoři, events, vyhledávání, autentizace (login/registrace/reset), 301 redirecty `/race` → `/events`
+- **Admin:** články/kategorie/uživatelé, statistiky, propagace, flash news, click tracking analytics, access control
+- **SEO:** meta tagy, canonical, OG/Twitter, JSON-LD, sitemap, robots
+- **GDPR:** cookie banner + spouštění trackingu až po souhlasu
+
+### Zbývá před spuštěním produkce
+- Dokončit a otestovat migraci dat (DB + obrázky + audio)
+- Vyčistit obsah/testovací kategorie (na stagingu jsou vidět testovací názvy i „Nevybráno“)
+- Srovnat SEO base URL: sitemap/robots teď generují odkazy na `www.cyklistickey.cz` i na stagingu
+- Ověřit a případně upravit `robots.txt` (UTF‑8 diakritika) a na stagingu ideálně zakázat indexaci
+- Dokončit otestování reklam (upload, zobrazování, frekvence) + případné doplnění Access Control/SQL migrace
+- Spustit audio rename/párování a zapsat audio do DB
+- Udělat ruční SEO kroky (Search Console, odeslat sitemapy, Publisher Center)
+- Vypnout/guardnout debug routing log (aktuálně se zapisuje `logs/debug_routing.log` pro každý request)
 
 ---
 

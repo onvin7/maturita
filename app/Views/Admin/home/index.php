@@ -71,15 +71,18 @@
         </div>
     </section>
 
+    <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] == 3): ?>
     <section class="content-section mb-4">
         <div class="section-header">
             <h2><i class="fa-solid fa-chart-line"></i> Nejčtenější články za posledních 7 dní</h2>
         </div>
         <div id="topArticlesChart" style="width: 100%; height: 500px;"></div>
     </section>
+    <?php endif; ?>
 
 <!-- ApexCharts knihovna -->
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] == 3): ?>
 <script>
     // Data z controlleru
     const chartData = <?= json_encode($topArticlesData) ?>;
@@ -237,3 +240,4 @@
         return colors;
     }
 </script>
+<?php endif; ?>

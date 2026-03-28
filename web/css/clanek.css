@@ -98,6 +98,23 @@ body {
   margin-bottom: 5vh;
 }
 
+.container-zobrazit .text .text-editor .article-ad {
+  width: 100%;
+  margin: 28px 0;
+}
+
+.container-zobrazit .text .text-editor .article-ad a {
+  display: block;
+  text-decoration: none;
+}
+
+.container-zobrazit .text .text-editor .article-ad img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+}
+
 .clanek p {
   margin-block: 20px;
   font-weight: 300;

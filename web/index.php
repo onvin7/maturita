@@ -26,6 +26,7 @@ require '../config/db.php';
 require '../config/autoloader.php';
 
 use App\Controllers\Web\ArticleController;
+use App\Controllers\Web\SearchController;
 use App\Controllers\Web\HomeController;
 use App\Controllers\Web\UserController;
 use App\Controllers\Web\CategoryController;
@@ -89,6 +90,7 @@ $routes = [
     '/login' => [LoginController::class, 'showLoginForm'],
     '/login/submit' => [LoginController::class, 'login'],
     '/logout' => [LoginController::class, 'logout'],
+    '/search' => [SearchController::class, 'index'],
     '/kontakt' => [HomeController::class, 'kontakt'],
     
     // Staré race URL - 301 redirecty na /events (pro SEO a zpětnou kompatibilitu)

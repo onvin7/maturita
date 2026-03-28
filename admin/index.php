@@ -54,6 +54,7 @@ use App\Controllers\Admin\CategoryAdminController;
 use App\Controllers\Admin\UserAdminController;
 use App\Controllers\Admin\AccessControlAdminController;
 use App\Controllers\Admin\PromotionAdminController;
+use App\Controllers\Admin\AdAdminController;
 use App\Controllers\Admin\FlashNewsJSONAdminController;
 use App\Controllers\Admin\LinkClicksAdminController;
 use App\Controllers\Admin\LogsAdminController;
@@ -127,7 +128,15 @@ $routes = [
     'promotions/store' => [PromotionAdminController::class, 'store'],
     'promotions/upcoming' => [PromotionAdminController::class, 'upcoming'],
     'promotions/history' => [PromotionAdminController::class, 'history'],
-    'promotions/delete' => [PromotionAdminController::class, 'delete', 'id'],
+    'promotions/delete/(\d+)' => [PromotionAdminController::class, 'delete', 'id'],
+    'ads' => [AdAdminController::class, 'index'],
+    'ads/create' => [AdAdminController::class, 'create'],
+    'ads/store' => [AdAdminController::class, 'store'],
+    'ads/edit/(\d+)' => [AdAdminController::class, 'edit', 'id'],
+    'ads/update/(\d+)' => [AdAdminController::class, 'update', 'id'],
+    'ads/delete/(\d+)' => [AdAdminController::class, 'delete', 'id'],
+    'ads/toggle-active/(\d+)' => [AdAdminController::class, 'toggleActive', 'id'],
+    'ads/set-default/(\d+)' => [AdAdminController::class, 'setDefault', 'id'],
     'settings' => [UserAdminController::class, 'settings'],
     'settings/update' => [UserAdminController::class, 'updateSettings'],
     'social-sites' => [UserAdminController::class, 'socialSites'],
@@ -155,11 +164,9 @@ $accessibleRoutes = $_SESSION['accessibleRoutes'] ?? array_keys($routes);
 
 // ✅ **Zpracování URI**
 $fullUri = $_SERVER['REQUEST_URI'];
-error_log("Full URI: " . $fullUri);
 
 // Odstranění query stringu, pokud existuje
 $uri = parse_url($fullUri, PHP_URL_PATH);
-error_log("URI bez query stringu: " . $uri);
 
 // Odstranění domény a /admin/ z URI
 if (preg_match('#^/[^/]+/admin/(.*)#', $uri, $matches)) {
@@ -169,11 +176,6 @@ if (preg_match('#^/[^/]+/admin/(.*)#', $uri, $matches)) {
 }
 
 $uri = trim($uri, '/');
-error_log("Finální URI pro routing: " . $uri);
-
-// Debug informace
-error_log("HTTP Metoda: " . $_SERVER['REQUEST_METHOD']);
-error_log("Dostupné routy: " . implode(', ', array_keys($routes)));
 
 // ✅ **Pokud je hlavní stránka, pustíme ji vždy**
 if ($uri === '' || $uri === 'home') {
@@ -184,55 +186,74 @@ if ($uri === '' || $uri === 'home') {
 // ✅ **Dynamické zpracování rout**
 $routeFound = false;
 
-foreach ($routes as $path => $route) {
-    error_log("Kontroluji routu: " . $path . " proti URI: " . $uri);
+// Rozdělíme URL na segmenty
+$uriSegments = explode('/', $uri);
+$firstSegment = $uriSegments[0] ?? '';
 
-    // Přímé porovnání pro přesnou shodu
-    if ($path === $uri) {
-        $controllerClass = $route[0];
-        $method = $route[1];
-        $controller = new $controllerClass($db);
-
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $controller->$method($_POST);
-        } else {
-            $controller->$method();
-        }
-
-        $routeFound = true;
-        break;
+// Seřadíme routy tak, aby ty s parametry (obsahující regulární výrazy) byly až na konci,
+// a specifické routy (jako articles/create) byly před obecnými (articles/edit/...)
+uksort($routes, function($a, $b) {
+    // Pokud $a je specifická podrouta $b (např. 'articles/create' vs 'articles'), $a má přednost
+    if (strpos($a, $b . '/') === 0) {
+        return -1;
     }
+    // Pokud $b je specifická podrouta $a, $b má přednost
+    if (strpos($b, $a . '/') === 0) {
+        return 1;
+    }
+    
+    // Routy bez parametrů (bez závorek) mají přednost před routami s parametry
+    $aHasParams = strpos($a, '(') !== false;
+    $bHasParams = strpos($b, '(') !== false;
+    
+    if ($aHasParams && !$bHasParams) return 1;
+    if (!$aHasParams && $bHasParams) return -1;
+    
+    // Jinak zachováme původní pořadí (nebo abecedně, to je jedno)
+    return 0;
+});
 
-    // Kontrola pro routy s parametry
+// Projdeme routy
+foreach ($routes as $path => $route) {
+    // Vytvoření regulárního výrazu z cesty routy
+    // Nahradíme definované parametry za odpovídající regex
+    // Ošetříme lomítka
+    
     if (strpos($path, '(') !== false) {
-        // Jedná se o routu s regulárním výrazem
-        $pattern = '#^' . $path . '$#';
+        // Cesta obsahuje regulární výrazy (parametry)
+        $pattern = '#^' . str_replace('/', '\/', $path) . '$#';
     } else {
-        // Běžná routa
+        // Cesta je statická
         $pattern = '#^' . preg_quote($path, '#') . '$#';
     }
-
-    error_log("Používám pattern: " . $pattern);
-
+    
     if (preg_match($pattern, $uri, $matches)) {
         $controllerClass = $route[0];
         $method = $route[1];
+        
+        // Vytvoření instance controlleru
         $controller = new $controllerClass($db);
-
+        
+        // Získání parametrů z URL (odstraníme první prvek - celou shodu)
+        array_shift($matches);
+        $params = $matches;
+        
+        // Pokud je POST požadavek a metoda očekává data, přidáme je k parametrům
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            if (isset($matches[1])) {
-                $controller->$method($matches[1], $_POST);
-            } else {
-                $controller->$method($_POST);
-            }
-        } else {
-            if (isset($matches[1])) {
-                $controller->$method($matches[1]);
-            } else {
-                $controller->$method();
+            // Zjistíme, kolik parametrů metoda očekává
+            $reflection = new ReflectionMethod($controllerClass, $method);
+            $paramCount = $reflection->getNumberOfParameters();
+            
+            // Pokud máme méně parametrů z URL než metoda očekává, předáme i POST data
+            // Toto řeší případy jako update($id, $data) vs store($data)
+            if (count($params) < $paramCount) {
+                $params[] = $_POST;
             }
         }
-
+        
+        // Zavoláme metodu s parametry
+        call_user_func_array([$controller, $method], $params);
+        
         $routeFound = true;
         break;
     }

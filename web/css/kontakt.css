@@ -420,6 +420,12 @@ body {
 
 }
 
+.galerie .team-image.missing-photo {
+    height: 400px;
+    width: 300px;
+    background-color: #00000F;
+}
+
 
 
 .galerie .team-image img {
@@ -462,6 +468,11 @@ body {
 
 }
 
+.galerie .team-image.missing-photo h2 {
+    color: white;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+}
+
 
 
 @media screen and (max-width: 700px) {
@@ -473,6 +484,11 @@ body {
     }
 
 
+    .galerie .team-image.missing-photo {
+        height: 250px;
+        width: 200px;
+
+    }
 
     .galerie .team-image h2 {
 

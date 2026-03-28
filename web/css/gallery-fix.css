@@ -197,7 +197,7 @@ div[class*="images-gallery-"] .gallery-item-wrapper:nth-child(n+6) {
 /* Overlay +X */
 .gallery-overlay {
     background-color: rgba(0, 0, 0, 0.6) !important;
-    color: #f1008d !important;
+    color: white !important;
     font-weight: 700 !important;
     font-size: 2.5rem !important;
     backdrop-filter: blur(2px) !important;

@@ -517,7 +517,7 @@ class Article
                 )
             )
             GROUP BY k.id
-            ORDER BY posledni_clanek DESC
+            ORDER BY CASE WHEN k.nazev_kategorie = 'Nevybráno' THEN 1 ELSE 0 END, posledni_clanek DESC
         ");
 
         $categories = $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
@@ -773,5 +773,95 @@ class Article
         $stmt->bindParam(':articleId', $articleId, \PDO::PARAM_INT);
         $stmt->bindParam(':categoryId', $categoryId, \PDO::PARAM_INT);
         return $stmt->execute();
+    }
+
+    public function search($query, ?int $limit = null, ?int $offset = null)
+    {
+        $sql = "
+            SELECT c.*,
+                   u.name AS autor_jmeno, 
+                   u.surname AS autor_prijmeni,
+                   GROUP_CONCAT(DISTINCT k.nazev_kategorie) as kategorie_nazvy,
+                   GROUP_CONCAT(DISTINCT k.url) as kategorie_urls,
+                   CASE
+                       WHEN c.nazev LIKE :query THEN 1
+                       ELSE 2
+                   END as relevance
+            FROM clanky c
+            LEFT JOIN users u ON c.user_id = u.id
+            LEFT JOIN clanky_kategorie ck ON c.id = ck.id_clanku
+            LEFT JOIN kategorie k ON ck.id_kategorie = k.id
+            WHERE (c.nazev LIKE :query OR c.obsah LIKE :query)
+            AND (
+                (c.viditelnost = 1 AND c.datum <= NOW())
+                OR EXISTS (
+                    SELECT 1 FROM propagace 
+                    WHERE propagace.id_clanku = c.id 
+                    AND propagace.zacatek <= NOW() 
+                    AND propagace.konec >= NOW()
+                )
+            )
+            GROUP BY c.id
+            ORDER BY relevance ASC, c.datum DESC
+        ";
+
+        if ($limit !== null) {
+            $limitValue = max(1, (int) $limit);
+            $offsetValue = max(0, (int) ($offset ?? 0));
+            $sql .= " LIMIT {$limitValue} OFFSET {$offsetValue}";
+        }
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':query', '%' . $query . '%');
+        $stmt->execute();
+        
+        $articles = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        // Process categories
+        foreach ($articles as &$article) {
+            $article['kategorie'] = [];
+            if (!empty($article['kategorie_nazvy']) && !empty($article['kategorie_urls'])) {
+                $nazvy = explode(',', $article['kategorie_nazvy']);
+                $urls = explode(',', $article['kategorie_urls']);
+                
+                for ($i = 0; $i < count($nazvy); $i++) {
+                    if (!empty($nazvy[$i]) && !empty($urls[$i])) {
+                        $article['kategorie'][] = [
+                            'nazev_kategorie' => trim($nazvy[$i]),
+                            'url' => trim($urls[$i])
+                        ];
+                    }
+                }
+            }
+            unset($article['kategorie_nazvy']);
+            unset($article['kategorie_urls']);
+        }
+
+        return $articles;
+    }
+
+    public function searchCount($query): int
+    {
+        $sql = "
+            SELECT COUNT(DISTINCT c.id) as total
+            FROM clanky c
+            WHERE (c.nazev LIKE :query OR c.obsah LIKE :query)
+            AND (
+                (c.viditelnost = 1 AND c.datum <= NOW())
+                OR EXISTS (
+                    SELECT 1 FROM propagace 
+                    WHERE propagace.id_clanku = c.id 
+                    AND propagace.zacatek <= NOW() 
+                    AND propagace.konec >= NOW()
+                )
+            )
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':query', '%' . $query . '%');
+        $stmt->execute();
+
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return (int) ($row['total'] ?? 0);
     }
 }

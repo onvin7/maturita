@@ -10,8 +10,8 @@
                 <thead class="artikly-thead text-center">
                     <tr>
                         <th>Stránka</th>
-                        <th>Moderátor</th>
-                        <th>Editor</th>
+                        <th>Pisatel článků</th>
+                        <th>Správce pisatelů</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -9,7 +9,36 @@ use App\Helpers\CsrfHelper; // Přidáno
 
 class CategoryAdminController
 {
-    // ...
+    private $model;
+
+    public function __construct($db)
+    {
+        $this->model = new Category($db);
+    }
+
+    public function index()
+    {
+        // Získání parametrů pro řazení a filtrování
+        $sortBy = $_GET['sort_by'] ?? 'id';
+        $order = $_GET['order'] ?? 'ASC';
+        $filter = $_GET['filter'] ?? '';
+
+        // Použití metody pro získání seřazených a filtrovaných dat
+        $categories = $this->model->getAllWithSortingAndFiltering($sortBy, $order, $filter);
+        
+        $adminTitle = "Správa kategorií | Admin Panel - Cyklistickey magazín";
+
+        $view = '../app/Views/Admin/categories/index.php';
+        include '../app/Views/Admin/layout/base.php';
+    }
+
+    public function create()
+    {
+        $adminTitle = "Vytvořit kategorii | Admin Panel - Cyklistickey magazín";
+        
+        $view = '../app/Views/Admin/categories/create.php';
+        include '../app/Views/Admin/layout/base.php';
+    }
 
     public function store($postData)
     {
